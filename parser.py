@@ -62,10 +62,3 @@ def display_results(entries, errors,warnings):
             table.add_row(warning['timestamp'], warning['service'], warning['message'])
 
         console.print(table)
-
-
-if __name__ == '__main__':
-    entries, errors, warnings= parse_log_file('sample.log')
-    display_results(entries, errors,warnings)
-    from ai import analyze_logs
-    analyze_logs(entries, errors, warnings)

@@ -1,0 +1,6 @@
+2024-02-03 10:15:01 INFO [PaymentService] Received POST /api/checkout for order_id=55102
+2024-02-03 10:15:02 INFO [PaymentService] Calling external payment gateway
+2024-02-03 10:15:32 ERROR [PaymentService] Gateway request timeout after 30s
+2024-02-03 10:15:32 ERROR [PaymentService] Unhandled exception: NoneType has no attribute 'status'
+2024-02-03 10:15:33 WARNING [OrderService] Order 55102 stuck in PENDING state
+2024-02-03 10:15:35 ERROR [OrderService] Database deadlock detected on orders table
