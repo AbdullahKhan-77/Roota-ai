@@ -1,0 +1,5 @@
+2024-03-10 14:22:01 INFO [UserService] Received request GET /api/session/9981
+2024-03-10 14:22:01 INFO [UserService] Looking up session for user_id=9981
+2024-03-10 14:22:01 ERROR [UserService] KeyError: 9981
+2024-03-10 14:22:01 ERROR [UserService] Traceback: user_session.py line 6, in get_session
+2024-03-10 14:22:01 ERROR [UserService] Unhandled exception, request failed with 500

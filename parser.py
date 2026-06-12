@@ -7,7 +7,17 @@ console = Console()
 LOG_PATTERN = re.compile(
     r'(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\s+(ERROR|WARNING|INFO|DEBUG)\s+\[(\w+)\]\s+(.*)'
 )
+FILE_PATTERN = re.compile(r'([\w\-/]+\.(?:py|cpp|c|h|hpp|js|ts|java|go|rb))')
+def extract_filenames(errors):
+    filenames = set()
 
+    for error in errors:
+        matches = FILE_PATTERN.findall(error['message'])
+        for match in matches:
+            filenames.add(match)
+
+    return list(filenames)     
+    
 def parse_log_line(line):
     match = LOG_PATTERN.match(line.strip())
     if match:

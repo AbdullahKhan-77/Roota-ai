@@ -1,5 +1,6 @@
 import click
-from parser import parse_log_file, display_results
+from parser import parse_log_file, display_results, extract_filenames
+from github import fetch_file_from_github
 from ai import analyze_logs
 import os 
 from rich.console import Console
@@ -8,11 +9,25 @@ console=Console()
 
 @click.command()
 @click.option('--log', required=True, help='Path to the log file to analyze')
-def main(log):
+@click.option('--repo', required=False, help='GitHub repo in format owner/repo, e.g. AbdullahKhan-77/demo-service')
+def main(log,repo):
     if os.path.exists(log):
         entries, errors, warnings = parse_log_file(log)
         display_results(entries, errors, warnings)
-        analyze_logs(entries, errors, warnings)
+        code_context = None
+
+        if repo:
+            filenames = extract_filenames(errors)
+            owner, repo_name = repo.split('/')
+            code_context = {}
+
+            for filename in filenames:
+                content = fetch_file_from_github(owner, repo_name, filename)
+                if content:
+                    code_context[filename]=content
+
+        analyze_logs(entries, errors, warnings, code_context)
+        
     else:
         console.print(f"[bold red]File '{log}' doesnt exist[/bold red]")
         raise click.Abort()
