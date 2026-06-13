@@ -8,6 +8,9 @@ LOG_PATTERN = re.compile(
     r'(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\s+(ERROR|WARNING|INFO|DEBUG)\s+\[(\w+)\]\s+(.*)'
 )
 FILE_PATTERN = re.compile(r'([\w\-/]+\.(?:py|cpp|c|h|hpp|js|ts|java|go|rb))')
+FILE_FUNCTION_PATTERN = re.compile(
+    r'([\w\-/]+\.(?:py|cpp|c|h|hpp|js|ts|java|go|rb)) line \d+, in (\w+)'
+)
 def extract_filenames(errors):
     filenames = set()
 
@@ -17,7 +20,18 @@ def extract_filenames(errors):
             filenames.add(match)
 
     return list(filenames)     
-    
+
+def extract_file_function_map(errors):
+    file_function_map = {}
+
+    for error in errors:
+        match = FILE_FUNCTION_PATTERN.search(error['message'])
+        if match:
+            filename = match.group(1)
+            function_name = match.group(2)
+            file_function_map[filename]=function_name
+
+    return file_function_map
 def parse_log_line(line):
     match = LOG_PATTERN.match(line.strip())
     if match:
@@ -72,3 +86,7 @@ def display_results(entries, errors,warnings):
             table.add_row(warning['timestamp'], warning['service'], warning['message'])
 
         console.print(table)
+
+if __name__ == '__main__':
+    entries, errors, warnings = parse_log_file('session_crash.log')
+    print(extract_file_function_map(errors))

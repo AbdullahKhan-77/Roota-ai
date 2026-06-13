@@ -33,6 +33,22 @@ def find_full_path(filename, all_paths):
 
     console.print(f"[yellow]Warning: multiple files named '{filename}' found: {matches}. Using '{matches[0]}'[/yellow]")
     return matches[0]
+
+def find_file_by_function(filename, function_name, all_paths, owner, repo_name):
+    candidates = [path for path in all_paths if path.endswith(filename)]
+
+    if len(candidates) <= 1:
+        return candidates[0] if candidates else None
+
+    for path in candidates:
+        content = fetch_file_from_github(owner, repo_name, path)
+        if content and f"def {function_name}" in content:
+            return path
+
+    console.print(f"[yellow]Warning: could not verify which '{filename}' contains '{function_name}'. Using '{candidates[0]}'[/yellow]")
+    return candidates[0]
+
+
 def fetch_file_from_github(owner, repo, filepath, branch="main"):
     url = f"https://raw.githubusercontent.com/{owner}/{repo}/{branch}/{filepath}"
 
