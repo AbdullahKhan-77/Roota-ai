@@ -17,11 +17,22 @@ def get_repo_file_tree(owner, repo, branch="main"):
         console.print(f"[bold red]Could not fetch repo tree (status {response.status_code})[/bold red]")
         return[]
 def find_full_path(filename, all_paths):
-    for path in all_paths:
-        if path.endswith(filename):
-            return path
-    return None
+    matches = [path for path in all_paths if path.endswith(filename)]
 
+    if len(matches) == 0:
+        return None
+
+    if len(matches) == 1:
+        return matches[0]
+
+    # Multiple matches
+    non_test_matches = [path for path in matches if 'test' not in path.lower()]
+
+    if len(non_test_matches) == 1:
+        return non_test_matches[0]
+
+    console.print(f"[yellow]Warning: multiple files named '{filename}' found: {matches}. Using '{matches[0]}'[/yellow]")
+    return matches[0]
 def fetch_file_from_github(owner, repo, filepath, branch="main"):
     url = f"https://raw.githubusercontent.com/{owner}/{repo}/{branch}/{filepath}"
 
