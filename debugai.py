@@ -1,6 +1,6 @@
 import click
 from parser import parse_log_file, display_results, extract_filenames, extract_file_function_map
-from github import fetch_file_from_github, get_repo_file_tree, find_full_path, find_file_by_function
+from github import fetch_file_from_github, get_repo_file_tree, find_full_path, find_file_by_function,get_default_branch
 from ai import analyze_logs
 import os 
 from rich.console import Console
@@ -19,19 +19,20 @@ def main(log,repo):
         if repo:
             filenames = extract_filenames(errors)
             owner, repo_name = repo.split('/')
+            branch = get_default_branch(owner, repo_name)
             code_context = {}
             
-            file_tree=get_repo_file_tree(owner,repo_name)
+            file_tree=get_repo_file_tree(owner,repo_name,branch)
             file_function_map = extract_file_function_map(errors)
 
             for filename in filenames:
                 if filename in file_function_map:
                     function_name=file_function_map[filename]
-                    full_path=find_file_by_function(filename,function_name,file_tree,owner,repo_name)
+                    full_path=find_file_by_function(filename,function_name,file_tree,owner,repo_name,branch)
                 else:
                     full_path=find_full_path(filename,file_tree)
                 if full_path:
-                    content = fetch_file_from_github(owner, repo_name, full_path)
+                    content = fetch_file_from_github(owner, repo_name, full_path,branch)
                     if content:
                         code_context[filename]=content
 
