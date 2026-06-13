@@ -1,6 +1,6 @@
 import click
 from parser import parse_log_file, display_results, extract_filenames
-from github import fetch_file_from_github
+from github import fetch_file_from_github, get_repo_file_tree, find_full_path
 from ai import analyze_logs
 import os 
 from rich.console import Console
@@ -20,11 +20,15 @@ def main(log,repo):
             filenames = extract_filenames(errors)
             owner, repo_name = repo.split('/')
             code_context = {}
+            
+            file_tree=get_repo_file_tree(owner,repo_name)
 
             for filename in filenames:
-                content = fetch_file_from_github(owner, repo_name, filename)
-                if content:
-                    code_context[filename]=content
+                full_path=find_full_path(filename,file_tree)
+                if full_path:
+                    content = fetch_file_from_github(owner, repo_name, full_path)
+                    if content:
+                        code_context[filename]=content
 
         analyze_logs(entries, errors, warnings, code_context)
         
@@ -34,3 +38,4 @@ def main(log,repo):
 
 if __name__ == '__main__':
     main()
+    
