@@ -86,7 +86,3 @@ def display_results(entries, errors,warnings):
             table.add_row(warning['timestamp'], warning['service'], warning['message'])
 
         console.print(table)
-
-if __name__ == '__main__':
-    entries, errors, warnings = parse_log_file('session_crash.log')
-    print(extract_file_function_map(errors))
