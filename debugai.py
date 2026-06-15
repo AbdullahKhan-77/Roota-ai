@@ -1,6 +1,7 @@
 import click
 from parser import parse_log_file, display_results, extract_filenames, extract_file_function_map
 from github import fetch_file_from_github, get_repo_file_tree, find_full_path, find_file_by_function,get_default_branch
+from crashdump import diagnose_from_report, extract_file_and_line
 from ai import analyze_logs
 import os 
 from rich.console import Console
@@ -9,8 +10,9 @@ console=Console()
 
 @click.command()
 @click.option('--log', required=True, help='Path to the log file to analyze')
+@click.option('--crash-report', required=False, help='Path to a C++ crash_report.log file')
 @click.option('--repo', required=False, help='GitHub repo in format owner/repo, e.g. AbdullahKhan-77/demo-service')
-def main(log,repo):
+def main(log, repo, crash_report):
     if os.path.exists(log):
         entries, errors, warnings = parse_log_file(log)
         display_results(entries, errors, warnings)
@@ -21,27 +23,43 @@ def main(log,repo):
             owner, repo_name = repo.split('/')
             branch = get_default_branch(owner, repo_name)
             code_context = {}
-            
-            file_tree=get_repo_file_tree(owner,repo_name,branch)
+
+            file_tree = get_repo_file_tree(owner, repo_name, branch)
             file_function_map = extract_file_function_map(errors)
 
             for filename in filenames:
                 if filename in file_function_map:
-                    function_name=file_function_map[filename]
-                    full_path=find_file_by_function(filename,function_name,file_tree,owner,repo_name,branch)
+                    function_name = file_function_map[filename]
+                    full_path = find_file_by_function(filename, function_name, file_tree, owner, repo_name, branch)
                 else:
-                    full_path=find_full_path(filename,file_tree)
+                    full_path = find_full_path(filename, file_tree)
                 if full_path:
-                    content = fetch_file_from_github(owner, repo_name, full_path,branch)
+                    content = fetch_file_from_github(owner, repo_name, full_path, branch)
                     if content:
-                        code_context[filename]=content
+                        code_context[filename] = content
 
-        analyze_logs(entries, errors, warnings, code_context)
-        
+        cpp_crash_info = None
+
+        if crash_report:
+            location = diagnose_from_report(crash_report)
+            cpp_filename, cpp_line = extract_file_and_line(location)
+            cpp_crash_info = {"filename": cpp_filename, "line": cpp_line}
+
+            if repo:
+                if code_context is None:
+                    code_context = {}
+
+                full_path = find_full_path(cpp_filename, file_tree)
+                if full_path:
+                    content = fetch_file_from_github(owner, repo_name, full_path, branch)
+                    if content:
+                        code_context[cpp_filename] = content
+
+        analyze_logs(entries, errors, warnings, code_context, cpp_crash_info)
+
     else:
         console.print(f"[bold red]File '{log}' doesnt exist[/bold red]")
         raise click.Abort()
-
 if __name__ == '__main__':
     main()
     

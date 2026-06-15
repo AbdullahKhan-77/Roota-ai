@@ -8,7 +8,7 @@ console = Console()
 
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
-def analyze_logs(entries, errors, warnings, code_context=None):
+def analyze_logs(entries, errors, warnings, code_context=None,cpp_crash_info=None):
     if not errors and not warnings:
         console.print("[green]No errors or warnings found. System looks healthy.[/green]")
         return
@@ -25,6 +25,10 @@ def analyze_logs(entries, errors, warnings, code_context=None):
     if code_context:
         for filename, content in code_context.items():
             code_text += f"\n=== {filename} ===\n{content}\n"
+    
+    cpp_crash_text = ""
+    if cpp_crash_info:
+        cpp_crash_text = f"\nCONFIRMED CRASH LOCATION: {cpp_crash_info['filename']}, line {cpp_crash_info['line']} (this is exact, verified via memory address resolution — not a guess)\n"
 
     prompt =f"""You are an expert production debugger with 15 years of experience in distributed systems.
 
@@ -38,6 +42,7 @@ WARNINGS:
 
 RELEVANT SOURCE CODE:
 {code_text}
+{cpp_crash_text}
 
 Provide your analysis in exactly this structure:
 
