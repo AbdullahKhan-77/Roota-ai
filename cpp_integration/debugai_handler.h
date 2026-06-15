@@ -6,13 +6,24 @@
 #include <cstdlib>
 #include <fstream>
 #include <string>
+#include <ctime>
 #include <unistd.h>
 #include <ucontext.h>
 
 namespace debugai {
 
+inline std::string g_output_dir = ".";
+
+inline std::string get_timestamp() {
+    std::time_t now = std::time(nullptr);
+    char buf[32];
+    std::strftime(buf, sizeof(buf), "%Y%m%d_%H%M%S", std::localtime(&now));
+    return std::string(buf);
+}
+
 inline void crash_handler(int signum, siginfo_t* info, void* context) {
-    std::ofstream log("crash_report.log");
+    std::string filename = g_output_dir + "/crash_report_" + get_timestamp() + ".log";
+    std::ofstream log(filename);
 
     char exe_path[1024];
     ssize_t len = readlink("/proc/self/exe", exe_path, sizeof(exe_path) - 1);
@@ -41,7 +52,9 @@ inline void crash_handler(int signum, siginfo_t* info, void* context) {
     std::_Exit(1);
 }
 
-inline void install_crash_handler() {
+inline void install_crash_handler(const std::string& output_dir = ".") {
+    g_output_dir = output_dir;
+
     struct sigaction sa;
     sa.sa_sigaction = crash_handler;
     sa.sa_flags = SA_SIGINFO;
