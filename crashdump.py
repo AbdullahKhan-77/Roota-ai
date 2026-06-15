@@ -68,6 +68,6 @@ def extract_file_and_line(location_string):
 
     
 if __name__ == '__main__':
-    location = diagnose_from_report("crash_report.log")
+    location = diagnose_from_report("cpp_integration/crash_report.log")
     filename, line_number = extract_file_and_line(location)
     print(filename, line_number)
