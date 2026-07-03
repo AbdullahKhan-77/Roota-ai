@@ -1,0 +1,4 @@
+[2024-06-01 09:15:33] CRITICAL payment-service: NullPointerException in PaymentProcessor.charge() at line 142
+[2024-06-01 09:15:33] ERROR payment-service: Transaction ID tx_9981 failed - gateway timeout after 30s
+[2024-06-01 09:15:34] WARN order-service: Order ORD-5521 stuck in PENDING - payment not confirmed
+[2024-06-01 09:15:35] ERROR order-service: Deadlock detected in orders table - rolling back transaction
