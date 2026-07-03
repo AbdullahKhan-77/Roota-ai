@@ -1,3 +1,3 @@
-BASE_MAP: 60b82188b000-60b82188d000 r--p 00000000 00:45 16325548649254695          /mnt/c/Users/ABDULLAH KHAN/Desktop/debugai/cpp_integration/test_handler
+BASE_MAP: 56fb9c6e8000-56fb9c6ea000 r--p 00000000 00:45 6192449488201172           /mnt/c/Users/ABDULLAH KHAN/Desktop/cpp-crash-demo/crash_pie_v3
 SIGNAL: 11
-CRASH_ADDRESS: 0x60b82188d451
+CRASH_ADDRESS: 0x56fb9c6ea6d1

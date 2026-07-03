@@ -66,7 +66,9 @@ Show the exact line that causes the problem and the exact corrected line.
 CONFIDENCE: X/10
 How confident you are in this diagnosis and why."""
 
-    console.print("\n[bold yellow]Sending logs to AI for analysis...[/bold yellow]\n")
+    console.print("\n[bold yellow]━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[/bold yellow]")
+    console.print("[bold yellow]  Analyzing with AI...[/bold yellow]")
+    console.print("[bold yellow]━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[/bold yellow]\n")
 
     response = client.models.generate_content(
         model="gemini-3.1-flash-lite",
