@@ -1,0 +1,8 @@
+2024-03-10 03:42:07 WARNING [UserService] Memory usage at 87% — approaching threshold
+2024-03-10 03:42:09 ERROR [Database] Connection pool exhausted — all 20 connections in use
+2024-03-10 03:42:11 ERROR [UserService] KeyError: 9981
+2024-03-10 03:42:11 ERROR [UserService] Traceback: user_session.py line 6, in get_session
+2024-03-10 03:42:11 ERROR [UserService] Unhandled exception — request failed with 500
+2024-03-10 03:42:12 ERROR [AuthService] JWT validation failed — UserService unavailable
+2024-03-10 03:42:13 ERROR [AuthService] Rate limit exceeded — 500 requests in 60 seconds
+2024-03-10 03:42:14 WARNING [APIGateway] Upstream timeout — UserService not responding
