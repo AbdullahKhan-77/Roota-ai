@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>debugai — AI-powered production debugger</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #0d1117;
+            color: #e6edf3;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            margin-bottom: 40px;
+        }
+
+        header h1 {
+            font-size: 2rem;
+            color: #58a6ff;
+            margin-bottom: 8px;
+        }
+
+        header p {
+            color: #8b949e;
+            font-size: 1rem;
+        }
+
+        .card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .card h2 {
+            font-size: 1rem;
+            color: #8b949e;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.875rem;
+            color: #8b949e;
+            margin-bottom: 6px;
+        }
+
+        input[type="text"],
+        input[type="file"] {
+            width: 100%;
+            padding: 10px 14px;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            color: #e6edf3;
+            font-size: 0.875rem;
+        }
+
+        input[type="file"] {
+            padding: 8px;
+            cursor: pointer;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #238636;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover { background: #2ea043; }
+        button:disabled { background: #21262d; color: #8b949e; cursor: not-allowed; }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat .number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #58a6ff;
+        }
+
+        .stat.errors .number { color: #f85149; }
+        .stat.warnings .number { color: #e3b341; }
+
+        .stat .label {
+            font-size: 0.75rem;
+            color: #8b949e;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 4px;
+        }
+
+        .diagnosis {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 24px;
+        }
+
+        .diagnosis h2 {
+            font-size: 1rem;
+            color: #8b949e;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 16px;
+        }
+
+        .diagnosis pre {
+            white-space: pre-wrap;
+            font-family: 'Cascadia Code', 'Fira Code', monospace;
+            font-size: 0.875rem;
+            line-height: 1.6;
+            color: #e6edf3;
+        }
+
+        .error-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+
+        .error-table th {
+            text-align: left;
+            padding: 8px 12px;
+            color: #8b949e;
+            border-bottom: 1px solid #30363d;
+            font-weight: 500;
+        }
+
+        .error-table td {
+            padding: 8px 12px;
+            border-bottom: 1px solid #21262d;
+        }
+
+        .error-table tr:last-child td { border-bottom: none; }
+
+        .badge-error { color: #f85149; font-weight: 600; }
+        .badge-warning { color: #e3b341; font-weight: 600; }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #8b949e;
+        }
+
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>debugai</h1>
+            <p>AI-powered production log analyzer — root causes and fixes in seconds</p>
+        </header>
+
+        <div class="card">
+            <h2>Analyze Logs</h2>
+            <div class="form-group">
+                <label>Log File</label>
+                <input type="file" id="logFile" accept=".log,.txt">
+            </div>
+            <div class="form-group">
+                <label>GitHub Repository (optional)</label>
+                <input type="text" id="repo" placeholder="owner/repo-name e.g. AbdullahKhan-77/demo-service">
+            </div>
+            <button id="analyzeBtn" onclick="analyze()">Analyze</button>
+        </div>
+
+        <div id="loading" class="loading hidden">
+            Analyzing logs and fetching source code...
+        </div>
+
+        <div id="results" class="hidden">
+            <div class="stats">
+                <div class="stat">
+                    <div class="number" id="totalLines">0</div>
+                    <div class="label">Lines Parsed</div>
+                </div>
+                <div class="stat errors">
+                    <div class="number" id="errorCount">0</div>
+                    <div class="label">Errors</div>
+                </div>
+                <div class="stat warnings">
+                    <div class="number" id="warningCount">0</div>
+                    <div class="label">Warnings</div>
+                </div>
+            </div>
+
+            <div class="card" id="errorsCard">
+                <h2>Errors Detected</h2>
+                <table class="error-table">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Service</th>
+                            <th>Message</th>
+                        </tr>
+                    </thead>
+                    <tbody id="errorsBody"></tbody>
+                </table>
+            </div>
+
+            <div class="diagnosis">
+                <h2>AI Diagnosis</h2>
+                <pre id="diagnosisText"></pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function analyze() {
+            const logFile = document.getElementById('logFile').files[0];
+            const repo = document.getElementById('repo').value;
+            const btn = document.getElementById('analyzeBtn');
+
+            if (!logFile) {
+                alert('Please select a log file');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Analyzing...';
+            document.getElementById('loading').classList.remove('hidden');
+            document.getElementById('results').classList.add('hidden');
+
+            const formData = new FormData();
+            formData.append('log_file', logFile);
+            if (repo) formData.append('repo', repo);
+
+            try {
+                const response = await fetch('http://127.0.0.1:8000/analyze', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                document.getElementById('totalLines').textContent = data.stats.total_lines;
+                document.getElementById('errorCount').textContent = data.stats.errors;
+                document.getElementById('warningCount').textContent = data.stats.warnings;
+
+                const tbody = document.getElementById('errorsBody');
+                tbody.innerHTML = '';
+                data.errors.forEach(err => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${err.timestamp}</td>
+                        <td>${err.service}</td>
+                        <td class="badge-error">${err.message}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+
+                document.getElementById('diagnosisText').textContent = data.diagnosis;
+
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('results').classList.remove('hidden');
+
+            } catch (error) {
+                alert('Error connecting to debugai server. Make sure it is running.');
+                console.error(error);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Analyze';
+            }
+        }
+    </script>
+</body>
+</html>

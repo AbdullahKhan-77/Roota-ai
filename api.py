@@ -38,7 +38,9 @@ async def analyze(
 
         if repo:
             filenames = extract_filenames(errors)
-            owner, repo_name = repo.split('/')
+            repo = repo.strip().strip('/')
+            parts = repo.split('/')
+            owner, repo_name = parts[0], parts[1]
             branch = get_default_branch(owner, repo_name)
             code_context = {}
 
