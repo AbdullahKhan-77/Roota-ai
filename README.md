@@ -71,6 +71,7 @@ python debugai.py --log crash.log --repo owner/repo-name --crash-report path/to/
 ---
 
 ## Example Output
+``` bash
 debugai v0.1.0 — AI-powered production debugger
 Errors Detected
 ┏━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
@@ -99,7 +100,7 @@ File: user_session.py, Line 6
 Before: return self.active_sessions[user_id]
 After:  return self.active_sessions.get(user_id)
 CONFIDENCE: 10/10
----
+```
 
 ## C++ Crash Handler
 
@@ -124,10 +125,11 @@ A timestamped crash report is written automatically:
 logs/crash_report_20260615_143022.log
 
 Containing:
+```bash
 BASE_MAP: 60b82188b000-60b82188d000 r--p ... /path/to/your/binary
 SIGNAL: 11
 CRASH_ADDRESS: 0x60b82188d451
-
+```
 ### Analyzing the crash
 
 ```bash
@@ -159,6 +161,7 @@ This guarantees the AI analyzes the **correct** file, not a coincidental name ma
 ---
 
 ## Project Structure
+```bash
 debugai/
 ├── debugai.py            # CLI entry point (click-based)
 ├── parser.py             # Log parsing, error/warning extraction, filename/function detection
@@ -170,7 +173,7 @@ debugai/
 │   └── crash_reports/    # Example crash report output
 ├── .env                  # API keys (never committed)
 └── .gitignore
----
+```
 
 ## Requirements
 
