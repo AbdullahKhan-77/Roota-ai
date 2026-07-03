@@ -191,14 +191,38 @@
 
         <div class="card">
             <h2>Analyze Logs</h2>
+
             <div class="form-group">
+                <div style="display:flex; gap:12px; margin-bottom:16px;">
+                    <button class="tab-btn active" id="tabUpload" onclick="switchTab('upload')" 
+                        style="width:auto; padding:8px 20px; background:#238636; font-size:0.875rem;">
+                        Upload File
+                    </button>
+                    <button class="tab-btn" id="tabPaste" onclick="switchTab('paste')"
+                        style="width:auto; padding:8px 20px; background:#21262d; font-size:0.875rem;">
+                        Paste Logs
+                    </button>
+                </div>
+            </div>
+
+            <div id="uploadSection" class="form-group">
                 <label>Log File</label>
                 <input type="file" id="logFile" accept=".log,.txt">
             </div>
-            <div class="form-group">
-                <label>GitHub Repository (optional)</label>
-                <input type="text" id="repo" placeholder="owner/repo-name e.g. AbdullahKhan-77/demo-service">
+
+            <div id="pasteSection" class="form-group hidden">
+                <label>Paste Log Content</label>
+                <textarea id="logText" rows="10" placeholder="Paste your log content here — any format supported..." 
+                    style="width:100%; padding:10px 14px; background:#0d1117; border:1px solid #30363d; 
+                    border-radius:6px; color:#e6edf3; font-size:0.875rem; font-family:monospace; 
+                    resize:vertical;"></textarea>
             </div>
+
+            <div class="form-group">
+                <label>GitHub Repository <span style="color:#8b949e; font-weight:400;">(optional — enables exact line-level diagnosis)</span></label>
+                <input type="text" id="repo" placeholder="owner/repo-name e.g. yourname/your-repo/">
+            </div>
+
             <button id="analyzeBtn" onclick="analyze()">Analyze</button>
         </div>
 
@@ -243,25 +267,51 @@
         </div>
     </div>
 
-    <script>
+   <script>
+        function switchTab(tab) {
+            if (tab === 'upload') {
+                document.getElementById('uploadSection').classList.remove('hidden');
+                document.getElementById('pasteSection').classList.add('hidden');
+                document.getElementById('tabUpload').style.background = '#238636';
+                document.getElementById('tabPaste').style.background = '#21262d';
+            } else {
+                document.getElementById('uploadSection').classList.add('hidden');
+                document.getElementById('pasteSection').classList.remove('hidden');
+                document.getElementById('tabUpload').style.background = '#21262d';
+                document.getElementById('tabPaste').style.background = '#238636';
+            }
+        }
+
         async function analyze() {
-            const logFile = document.getElementById('logFile').files[0];
             const repo = document.getElementById('repo').value;
             const btn = document.getElementById('analyzeBtn');
+            const isUpload = !document.getElementById('uploadSection').classList.contains('hidden');
 
-            if (!logFile) {
-                alert('Please select a log file');
-                return;
+            let formData = new FormData();
+
+            if (isUpload) {
+                const logFile = document.getElementById('logFile').files[0];
+                if (!logFile) {
+                    alert('Please select a log file');
+                    return;
+                }
+                formData.append('log_file', logFile);
+            } else {
+                const logText = document.getElementById('logText').value.trim();
+                if (!logText) {
+                    alert('Please paste some log content');
+                    return;
+                }
+                const blob = new Blob([logText], { type: 'text/plain' });
+                formData.append('log_file', blob, 'pasted.log');
             }
+
+            if (repo) formData.append('repo', repo);
 
             btn.disabled = true;
             btn.textContent = 'Analyzing...';
             document.getElementById('loading').classList.remove('hidden');
             document.getElementById('results').classList.add('hidden');
-
-            const formData = new FormData();
-            formData.append('log_file', logFile);
-            if (repo) formData.append('repo', repo);
 
             try {
                 const response = await fetch('http://127.0.0.1:8000/analyze', {
