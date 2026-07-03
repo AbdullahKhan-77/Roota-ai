@@ -77,3 +77,4 @@ How confident you are in this diagnosis and why."""
 
     console.print("[bold green]AI Diagnosis:[/bold green]\n")
     print(response.text)
+    return response.text
