@@ -38,6 +38,7 @@ pip install click httpx rich python-dotenv google-genai
 ```
 
 Create a `.env` file in the project root:
+
 GEMINI_API_KEY=your_key_here
 ---
 
