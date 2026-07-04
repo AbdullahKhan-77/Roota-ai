@@ -266,6 +266,13 @@
             </div>
         </div>
     </div>
+    <div style="margin-top:40px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                <h2 style="color:#8b949e; font-size:1rem; text-transform:uppercase; letter-spacing:0.05em;">Past Incidents</h2>
+                <button onclick="loadHistory()" style="width:auto; padding:8px 16px; background:#21262d; font-size:0.875rem;">Refresh</button>
+            </div>
+            <div id="historyList"></div>
+        </div>
 
    <script>
         function switchTab(tab) {
@@ -350,6 +357,41 @@
                 btn.textContent = 'Analyze';
             }
         }
+    async function loadHistory() {
+            try {
+                const response = await fetch('http://127.0.0.1:8000/incidents');
+                const data = await response.json();
+
+                const container = document.getElementById('historyList');
+
+                if (data.incidents.length === 0) {
+                    container.innerHTML = '<p style="color:#8b949e; text-align:center; padding:20px;">No incidents yet.</p>';
+                    return;
+                }
+
+                container.innerHTML = data.incidents.map(inc => `
+                    <div style="background:#161b22; border:1px solid #30363d; border-radius:8px; padding:16px; margin-bottom:12px;">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                            <span style="color:#58a6ff; font-weight:600;">Incident #${inc.id}</span>
+                            <span style="color:#8b949e; font-size:0.875rem;">${inc.timestamp.split('T')[0]} ${inc.timestamp.split('T')[1].split('.')[0]}</span>
+                        </div>
+                        <div style="display:flex; gap:16px; margin-bottom:8px;">
+                            <span style="color:#f85149;">● ${inc.error_count} errors</span>
+                            <span style="color:#e3b341;">● ${inc.warning_count} warnings</span>
+                            ${inc.repo ? `<span style="color:#8b949e;">📦 ${inc.repo}</span>` : ''}
+                        </div>
+                        <div style="color:#8b949e; font-size:0.875rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                        ${inc.diagnosis ? inc.diagnosis.split('\n').filter(line => line.trim() && !line.includes('INCIDENT SUMMARY:') && !line.startsWith('━'))[0] || 'No diagnosis' : 'No diagnosis'}
+                        </div>
+                    </div>
+                `).join('');
+
+            } catch (error) {
+                console.error('Could not load history:', error);
+            }
+        }
+
+        loadHistory();
     </script>
 </body>
 </html>
