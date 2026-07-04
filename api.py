@@ -3,12 +3,16 @@ from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
 import tempfile
 import os
+import json
+from database import save_incident, get_all_incidents, get_incident, init_db
 
 from parser import parse_log_file, display_results, extract_filenames, extract_file_function_map
 from ai import analyze_logs
 from github import fetch_file_from_github, get_repo_file_tree, find_full_path, find_file_by_function, get_default_branch
 
 app = FastAPI(title="debugai API", version="0.1.0")
+
+init_db()
 
 app.add_middleware(
     CORSMiddleware,
@@ -60,8 +64,21 @@ async def analyze(
 
         diagnosis = analyze_logs(entries, errors, warnings, code_context)
 
+        with open(tmp_path, 'r', encoding='utf-8') as f:
+            log_text = f.read()
+
+        incident_id = save_incident(
+            log_text=log_text,
+            repo=repo,
+            errors=errors,
+            warnings=warnings,
+            diagnosis=diagnosis,
+            total_lines=len(entries)
+        )
+
         return {
             "status": "success",
+            "incident_id": incident_id,
             "stats": {
                 "total_lines": len(entries),
                 "errors": len(errors),
@@ -71,6 +88,21 @@ async def analyze(
             "warnings": warnings,
             "diagnosis": diagnosis
         }
-
     finally:
         os.unlink(tmp_path)
+        
+@app.get("/incidents")
+def list_incidents():
+    incidents = get_all_incidents()
+    return {"incidents": incidents}
+
+
+@app.get("/incidents/{incident_id}")
+def get_incident_by_id(incident_id: int):
+    incident = get_incident(incident_id)
+    if not incident:
+        return {"error": "Incident not found"}
+    incident['errors'] = json.loads(incident['errors'])
+    incident['warnings'] = json.loads(incident['warnings'])
+    return incident
+
