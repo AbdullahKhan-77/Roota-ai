@@ -1,14 +1,17 @@
-from fastapi import FastAPI, UploadFile, File, Form
+from fastapi import FastAPI, UploadFile, File, Form, Query
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
 import tempfile
 import os
 import json
-from database import save_incident, get_all_incidents, get_incident, init_db
+from database import save_incident, get_all_incidents, get_incident, init_db, save_feedback
 
 from parser import parse_log_file, display_results, extract_filenames, extract_file_function_map
 from ai import analyze_logs
 from github import fetch_file_from_github, get_repo_file_tree, find_full_path, find_file_by_function, get_default_branch
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+
 
 app = FastAPI(title="debugai API", version="0.1.0")
 
@@ -17,10 +20,10 @@ init_db()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 @app.get("/")
 def root():
     return {"message": "debugai API is running", "version": "0.1.0"}
@@ -106,3 +109,11 @@ def get_incident_by_id(incident_id: int):
     incident['warnings'] = json.loads(incident['warnings'])
     return incident
 
+@app.post("/incidents/{incident_id}/feedback")
+def submit_feedback(incident_id: int, rating: str = Query(...)):
+    save_feedback(incident_id, rating)
+    return {"status": "feedback saved", "incident_id": incident_id, "rating": rating}
+
+@app.get("/ui")
+def serve_ui():
+    return FileResponse("index.html")

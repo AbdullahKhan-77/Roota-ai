@@ -26,6 +26,7 @@ def init_db():
             total_lines INTEGER,
             error_count INTEGER,
             warning_count INTEGER
+            feedback TEXT
         )
     ''')
 
@@ -74,5 +75,15 @@ def get_incident(incident_id):
     conn.close()
     return dict(row) if row else None
 
+def save_feedback(incident_id, rating):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        'UPDATE incidents SET feedback = ? WHERE id = ?',
+        (rating, incident_id)
+    )
+    conn.commit()
+    conn.close()
+    
 if __name__ == '__main__':
     init_db()

@@ -220,7 +220,7 @@
 
             <div class="form-group">
                 <label>GitHub Repository <span style="color:#8b949e; font-weight:400;">(optional — enables exact line-level diagnosis)</span></label>
-                <input type="text" id="repo" placeholder="owner/repo-name e.g. yourname/your-repo/">
+                <input type="text" id="repo" placeholder="owner/your-repo/">
             </div>
 
             <button id="analyzeBtn" onclick="analyze()">Analyze</button>
@@ -383,7 +383,19 @@
                         <div style="color:#8b949e; font-size:0.875rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
                         ${inc.diagnosis ? inc.diagnosis.split('\n').filter(line => line.trim() && !line.includes('INCIDENT SUMMARY:') && !line.startsWith('━'))[0] || 'No diagnosis' : 'No diagnosis'}
                         </div>
+                        <div style="margin-top:12px; display:flex; gap:8px;">
+                            <button onclick="submitFeedback(${inc.id}, 'correct')" 
+                                style="width:auto; padding:4px 12px; background:#1a3a2a; border:1px solid #238636; border-radius:4px; color:#3fb950; font-size:0.8rem; cursor:pointer;">
+                                👍 Correct
+                            </button>
+                            <button onclick="submitFeedback(${inc.id}, 'incorrect')"
+                                style="width:auto; padding:4px 12px; background:#3a1a1a; border:1px solid #f85149; border-radius:4px; color:#f85149; font-size:0.8rem; cursor:pointer;">
+                                👎 Incorrect
+                            </button>
+                            ${inc.feedback ? `<span style="color:#8b949e; font-size:0.8rem; align-self:center;">Marked: ${inc.feedback}</span>` : ''}
+                        </div>
                     </div>
+
                 `).join('');
 
             } catch (error) {
@@ -392,6 +404,16 @@
         }
 
         loadHistory();
+    async function submitFeedback(incidentId, rating) {
+            try {
+                await fetch(`http://127.0.0.1:8000/incidents/${incidentId}/feedback?rating=${rating}`, {
+                    method: 'POST'
+                });
+                loadHistory();
+            } catch (error) {
+                console.error('Could not submit feedback:', error);
+            }
+        }
     </script>
 </body>
 </html>
