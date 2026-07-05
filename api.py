@@ -117,3 +117,60 @@ def submit_feedback(incident_id: int, rating: str = Query(...)):
 @app.get("/ui")
 def serve_ui():
     return FileResponse("index.html")
+
+@app.post("/ingest")
+async def ingest(data: dict):
+    try:
+        log_text = data.get('log_text', '')
+        repo = data.get('repo', None)
+        source = data.get('source', 'sdk')
+
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.log', 
+                                         delete=False, encoding='utf-8') as tmp:
+            tmp.write(log_text)
+            tmp_path = tmp.name
+
+        entries, errors, warnings = parse_log_file(tmp_path)
+
+        code_context = None
+        if repo and errors:
+            filenames = extract_filenames(errors)
+            owner, repo_name = repo.split('/')
+            branch = get_default_branch(owner, repo_name)
+            code_context = {}
+            file_tree = get_repo_file_tree(owner, repo_name, branch)
+            file_function_map = extract_file_function_map(errors)
+
+            for filename in filenames:
+                if filename in file_function_map:
+                    function_name = file_function_map[filename]
+                    full_path = find_file_by_function(filename, function_name, file_tree, owner, repo_name, branch)
+                else:
+                    full_path = find_full_path(filename, file_tree)
+                if full_path:
+                    file_content = fetch_file_from_github(owner, repo_name, full_path, branch)
+                    if file_content:
+                        code_context[filename] = file_content
+
+        diagnosis = analyze_logs(entries, errors, warnings, code_context)
+
+        incident_id = save_incident(
+            log_text=log_text,
+            repo=repo,
+            errors=errors,
+            warnings=warnings,
+            diagnosis=diagnosis,
+            total_lines=len(entries)
+        )
+
+        os.unlink(tmp_path)
+
+        return {
+            "status": "success",
+            "incident_id": incident_id,
+            "source": source,
+            "errors_found": len(errors)
+        }
+
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
