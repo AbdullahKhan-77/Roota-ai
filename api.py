@@ -13,7 +13,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, RedirectResponse
 
 
-app = FastAPI(title="debugai API", version="0.1.0")
+app = FastAPI(title="Roota API", version="0.1.0")
 
 init_db()
 def get_current_user(x_api_key: str = Header(None)):
@@ -30,11 +30,15 @@ app.add_middleware(
 )
 @app.get("/")
 def root():
-    return RedirectResponse(url="/login")
+    return RedirectResponse(url="/home")
 
 @app.get("/login")
 def serve_login():
     return FileResponse("login.html")
+
+@app.get("/home")
+def serve_home():
+    return FileResponse("landing.html")
 
 @app.post("/analyze")
 async def analyze(
@@ -213,3 +217,7 @@ def login(email: str = Form(...), password: str = Form(...)):
         "email": user["email"],
         "api_key": user["api_key"]
     }
+    
+@app.get("/docs-page")
+def serve_docs():
+    return FileResponse("docs.html")

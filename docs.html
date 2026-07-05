@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roota — Documentation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg: #090909;
+            --surface: #111111;
+            --surface2: #1a1a1a;
+            --border: #222222;
+            --blue: #3B82F6;
+            --blue-dim: #3B82F615;
+            --text: #ffffff;
+            --muted: #888888;
+            --muted2: #444444;
+            --green: #34d399;
+            --red: #f87171;
+            --yellow: #fbbf24;
+        }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* TOP NAV */
+        .topnav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 48px;
+            background: rgba(9,9,9,0.9);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .logo-icon { width: 28px; height: 28px; }
+
+        .nav-right {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .btn-ghost {
+            padding: 7px 16px;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--muted);
+            font-size: 0.825rem;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .btn-ghost:hover { color: var(--text); border-color: #444; }
+
+        .btn-primary {
+            padding: 7px 16px;
+            background: var(--blue);
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-size: 0.825rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        /* LAYOUT */
+        .layout {
+            display: flex;
+            padding-top: 61px;
+            min-height: 100vh;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 260px;
+            flex-shrink: 0;
+            position: fixed;
+            top: 61px;
+            left: 0;
+            bottom: 0;
+            overflow-y: auto;
+            border-right: 1px solid var(--border);
+            padding: 32px 0;
+        }
+
+        .sidebar-section {
+            margin-bottom: 32px;
+            padding: 0 20px;
+        }
+
+        .sidebar-label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--muted2);
+            margin-bottom: 12px;
+            padding: 0 12px;
+        }
+
+        .sidebar-link {
+            display: block;
+            padding: 7px 12px;
+            border-radius: 6px;
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all 0.15s;
+            margin-bottom: 2px;
+        }
+
+        .sidebar-link:hover {
+            color: var(--text);
+            background: var(--surface2);
+        }
+
+        .sidebar-link.active {
+            color: var(--blue);
+            background: var(--blue-dim);
+        }
+
+        /* CONTENT */
+        .content {
+            margin-left: 260px;
+            flex: 1;
+            padding: 60px 80px;
+            max-width: 860px;
+        }
+
+        /* TYPOGRAPHY */
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            margin-bottom: 16px;
+            line-height: 1.1;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-top: 60px;
+            margin-bottom: 16px;
+            padding-top: 60px;
+            border-top: 1px solid var(--border);
+        }
+
+        h2:first-of-type { border-top: none; margin-top: 40px; padding-top: 0; }
+
+        h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-top: 32px;
+            margin-bottom: 12px;
+            color: var(--text);
+        }
+
+        p {
+            color: #aaa;
+            line-height: 1.8;
+            margin-bottom: 16px;
+            font-size: 0.925rem;
+        }
+
+        .lead {
+            font-size: 1.1rem;
+            color: var(--muted);
+            line-height: 1.7;
+            margin-bottom: 40px;
+        }
+
+        /* CODE BLOCKS */
+        pre {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px 24px;
+            overflow-x: auto;
+            margin: 16px 0 24px;
+            position: relative;
+        }
+
+        pre code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            line-height: 1.8;
+            color: #e2e8f0;
+        }
+
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.82rem;
+            background: var(--surface2);
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: var(--blue);
+        }
+
+        pre code { background: none; padding: 0; color: #e2e8f0; }
+
+        .code-comment { color: #555; }
+        .code-green { color: #34d399; }
+        .code-blue { color: #93c5fd; }
+        .code-yellow { color: #fbbf24; }
+        .code-red { color: #f87171; }
+        .code-purple { color: #c4b5fd; }
+
+        /* CALLOUTS */
+        .callout {
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin: 20px 0;
+            font-size: 0.875rem;
+            line-height: 1.7;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .callout-info {
+            background: #1a2744;
+            border: 1px solid #1d4ed8;
+            color: #93c5fd;
+        }
+
+        .callout-tip {
+            background: #142820;
+            border: 1px solid #166534;
+            color: #86efac;
+        }
+
+        .callout-warn {
+            background: #271f10;
+            border: 1px solid #92400e;
+            color: #fcd34d;
+        }
+
+        .callout-icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+
+        /* TABLE */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 0.875rem;
+        }
+
+        th {
+            text-align: left;
+            padding: 10px 16px;
+            background: var(--surface2);
+            color: var(--muted);
+            font-weight: 600;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            color: #aaa;
+            vertical-align: top;
+        }
+
+        td:first-child { color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; }
+
+        tr:last-child td { border-bottom: none; }
+
+        /* BADGES */
+        .badge {
+            display: inline-flex;
+            padding: 2px 8px;
+            border-radius: 100px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .badge-get { background: #142820; color: #34d399; border: 1px solid #166534; }
+        .badge-post { background: #1a2744; color: #93c5fd; border: 1px solid #1d4ed8; }
+
+        /* STEP */
+        .step-list { counter-reset: steps; }
+        .step {
+            counter-increment: steps;
+            display: flex;
+            gap: 16px;
+            margin-bottom: 32px;
+            align-items: flex-start;
+        }
+
+        .step-num {
+            width: 28px;
+            height: 28px;
+            background: var(--blue-dim);
+            border: 1px solid #3B82F630;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--blue);
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .step-body h3 { margin-top: 0; }
+
+        /* DIVIDER */
+        hr {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 40px 0;
+        }
+
+        /* ON THIS PAGE */
+        .on-this-page {
+            position: fixed;
+            top: 100px;
+            right: 40px;
+            width: 200px;
+        }
+
+        .on-this-page h4 {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--muted2);
+            margin-bottom: 12px;
+        }
+
+        .on-this-page a {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--muted);
+            text-decoration: none;
+            padding: 4px 0;
+            transition: color 0.2s;
+        }
+
+        .on-this-page a:hover { color: var(--text); }
+    </style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<nav class="topnav">
+    <a href="/home" class="nav-logo">
+        <svg class="logo-icon" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="1" y="1" width="30" height="30" rx="7" stroke="#3B82F6" stroke-width="2.5" fill="none"/>
+            <circle cx="10" cy="16" r="2.5" fill="#3B82F6"/>
+            <path d="M15 11.5L21.5 16L15 20.5" stroke="#3B82F6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Roota
+    </a>
+    <div class="nav-right">
+        <a href="/home" class="btn-ghost">Home</a>
+        <a href="/login" class="btn-primary">Get Started</a>
+    </div>
+</nav>
+
+<div class="layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div class="sidebar-section">
+            <div class="sidebar-label">Getting Started</div>
+            <a href="#introduction" class="sidebar-link active">Introduction</a>
+            <a href="#installation" class="sidebar-link">Installation</a>
+            <a href="#quickstart" class="sidebar-link">Quickstart</a>
+        </div>
+        <div class="sidebar-section">
+            <div class="sidebar-label">CLI</div>
+            <a href="#cli-overview" class="sidebar-link">Overview</a>
+            <a href="#cli-analyze" class="sidebar-link">analyze command</a>
+            <a href="#cli-options" class="sidebar-link">Options reference</a>
+        </div>
+        <div class="sidebar-section">
+            <div class="sidebar-label">SDKs</div>
+            <a href="#python-sdk" class="sidebar-link">Python SDK</a>
+            <a href="#cpp-sdk" class="sidebar-link">C++ Handler</a>
+        </div>
+        <div class="sidebar-section">
+            <div class="sidebar-label">API Reference</div>
+            <a href="#api-analyze" class="sidebar-link">POST /analyze</a>
+            <a href="#api-ingest" class="sidebar-link">POST /ingest</a>
+            <a href="#api-incidents" class="sidebar-link">GET /incidents</a>
+            <a href="#api-feedback" class="sidebar-link">POST /feedback</a>
+        </div>
+        <div class="sidebar-section">
+            <div class="sidebar-label">Guides</div>
+            <a href="#log-formats" class="sidebar-link">Log Formats</a>
+            <a href="#github-integration" class="sidebar-link">GitHub Integration</a>
+            <a href="#cpp-crashes" class="sidebar-link">C++ Crash Analysis</a>
+        </div>
+    </aside>
+
+    <!-- CONTENT -->
+    <main class="content">
+
+        <!-- INTRODUCTION -->
+        <div id="introduction">
+            <p style="color:var(--muted); font-size:0.8rem; margin-bottom:12px;">GETTING STARTED</p>
+            <h1>Introduction</h1>
+            <p class="lead">Roota is an AI-native production debugger that connects your crash logs to your actual source code and delivers exact root causes, timelines, and fixes — automatically.</p>
+
+            <div class="callout callout-info">
+                <span class="callout-icon">ℹ️</span>
+                <div>Roota is currently in beta. The CLI, Python SDK, and C++ handler are all fully functional. Web UI and API access require a free account.</div>
+            </div>
+
+            <p>Most debugging tools tell you <strong>what</strong> broke. Roota tells you <strong>why</strong> and <strong>how to fix it</strong> — by reading your actual codebase, not making generic guesses.</p>
+
+            <h3>How it works</h3>
+            <p>When you analyze a log file, Roota:</p>
+            <ol style="color:#aaa; padding-left:20px; line-height:2; font-size:0.925rem;">
+                <li>Parses and structures all errors and warnings from your log</li>
+                <li>Extracts which source files are mentioned in the crash</li>
+                <li>Fetches the actual source code from your GitHub repository</li>
+                <li>Sends logs + real source code to AI for grounded analysis</li>
+                <li>Returns an exact diagnosis: root cause, timeline, cascading effects, and fix</li>
+            </ol>
+        </div>
+
+        <!-- INSTALLATION -->
+        <h2 id="installation">Installation</h2>
+
+        <h3>Requirements</h3>
+        <table>
+            <thead><tr><th>Requirement</th><th>Version</th><th>Notes</th></tr></thead>
+            <tbody>
+                <tr><td>Python</td><td>3.11+</td><td>Required for CLI and SDK</td></tr>
+                <tr><td>WSL (Windows)</td><td>Any</td><td>Required for C++ crash analysis on Windows</td></tr>
+                <tr><td>g++</td><td>Any</td><td>Required to compile C++ crash handler</td></tr>
+                <tr><td>Gemini API key</td><td>—</td><td>Free at aistudio.google.com</td></tr>
+            </tbody>
+        </table>
+
+        <h3>Clone and set up</h3>
+        <pre><code><span class="code-comment"># Clone the repository</span>
+git clone https://github.com/AbdullahKhan-77/debugai.git
+cd debugai
+
+<span class="code-comment"># Create virtual environment</span>
+python -m venv venv
+venv\Scripts\activate  <span class="code-comment"># Windows</span>
+source venv/bin/activate  <span class="code-comment"># Linux/Mac</span>
+
+<span class="code-comment"># Install dependencies</span>
+pip install click httpx rich python-dotenv google-genai fastapi uvicorn bcrypt</code></pre>
+
+        <h3>Configure API key</h3>
+        <p>Create a <code>.env</code> file in the project root:</p>
+        <pre><code>GEMINI_API_KEY=your_key_here</code></pre>
+
+        <div class="callout callout-tip">
+            <span class="callout-icon">✅</span>
+            <div>Get a free Gemini API key at <strong>aistudio.google.com</strong>. The free tier is generous enough for development and early production use.</div>
+        </div>
+
+        <!-- QUICKSTART -->
+        <h2 id="quickstart">Quickstart</h2>
+        <p>Get from zero to a working diagnosis in under 5 minutes.</p>
+
+        <div class="step-list">
+            <div class="step">
+                <div class="step-num">1</div>
+                <div class="step-body">
+                    <h3>Start the server</h3>
+                    <pre><code>uvicorn api:app --reload</code></pre>
+                    <p>The web UI will be available at <code>http://127.0.0.1:8000/ui</code></p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-num">2</div>
+                <div class="step-body">
+                    <h3>Create an account</h3>
+                    <p>Go to <code>http://127.0.0.1:8000/login</code> and sign up with your email and password.</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-num">3</div>
+                <div class="step-body">
+                    <h3>Analyze your first log</h3>
+                    <pre><code>python debugai.py --log crash.log --repo owner/repo-name</code></pre>
+                    <p>Or paste your log directly in the web UI at <code>/ui</code>.</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-num">4</div>
+                <div class="step-body">
+                    <h3>Get your diagnosis</h3>
+                    <p>Roota will return an exact root cause, timeline, cascading effects, and a specific code fix with the exact line to change.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- CLI -->
+        <h2 id="cli-overview">CLI Overview</h2>
+        <p>The Roota CLI is the fastest way to analyze a log file. It runs entirely on your machine and doesn't require the server to be running.</p>
+
+        <pre><code>python debugai.py [OPTIONS]</code></pre>
+
+        <h2 id="cli-analyze">analyze command</h2>
+        <p>The primary command. Analyzes a log file and returns an AI-powered diagnosis.</p>
+
+        <pre><code><span class="code-comment"># Basic analysis</span>
+python debugai.py --log crash.log
+
+<span class="code-comment"># With GitHub source code (recommended)</span>
+python debugai.py --log crash.log --repo owner/repo-name
+
+<span class="code-comment"># With C++ crash report</span>
+python debugai.py --log crash.log --repo owner/repo --crash-report crash_report.log</code></pre>
+
+        <h2 id="cli-options">Options reference</h2>
+        <table>
+            <thead><tr><th>Option</th><th>Required</th><th>Description</th></tr></thead>
+            <tbody>
+                <tr><td>--log</td><td>Yes</td><td>Path to the log file to analyze. Supports any format — structured, JSON, Python tracebacks, etc.</td></tr>
+                <tr><td>--repo</td><td>No</td><td>GitHub repository in format owner/repo. Enables exact line-level diagnosis using real source code.</td></tr>
+                <tr><td>--crash-report</td><td>No</td><td>Path to a C++ crash_report.log generated by the Roota crash handler. Enables exact memory address resolution.</td></tr>
+                <tr><td>--version</td><td>No</td><td>Show the current version.</td></tr>
+                <tr><td>--help</td><td>No</td><td>Show help text and exit.</td></tr>
+            </tbody>
+        </table>
+
+        <!-- PYTHON SDK -->
+        <h2 id="python-sdk">Python SDK</h2>
+        <p>The Python SDK automatically captures unhandled exceptions and sends them to your Roota server for analysis. No manual log uploads needed.</p>
+
+        <h3>Setup</h3>
+        <p>Copy <code>debugai_sdk.py</code> into your project, then add two lines:</p>
+
+        <pre><code><span class="code-blue">import</span> debugai_sdk
+
+debugai_sdk.install(
+    repo=<span class="code-green">"owner/your-repo"</span>,
+    server=<span class="code-green">"http://127.0.0.1:8000"</span>  <span class="code-comment"># your Roota server URL</span>
+)</code></pre>
+
+        <h3>How it works</h3>
+        <p>The SDK installs a global exception handler using <code>sys.excepthook</code>. When any unhandled exception occurs:</p>
+        <ol style="color:#aaa; padding-left:20px; line-height:2; font-size:0.925rem;">
+            <li>The full stack trace is captured automatically</li>
+            <li>It's formatted into Roota's log format</li>
+            <li>Sent to your server's <code>/ingest</code> endpoint via HTTP POST</li>
+            <li>Your server analyzes it and stores the incident</li>
+            <li>The normal Python traceback is still printed to the terminal</li>
+        </ol>
+
+        <div class="callout callout-tip">
+            <span class="callout-icon">✅</span>
+            <div>The SDK works with any Python app — Django, Flask, FastAPI, scripts, or long-running services. Add it once at startup and every crash is automatically captured.</div>
+        </div>
+
+        <h3>Configuration options</h3>
+        <table>
+            <thead><tr><th>Parameter</th><th>Default</th><th>Description</th></tr></thead>
+            <tbody>
+                <tr><td>repo</td><td>None</td><td>GitHub repo (owner/repo) for source code fetching. Optional but strongly recommended.</td></tr>
+                <tr><td>server</td><td>http://127.0.0.1:8000</td><td>URL of your Roota server instance.</td></tr>
+            </tbody>
+        </table>
+
+        <!-- C++ SDK -->
+        <h2 id="cpp-sdk">C++ Crash Handler</h2>
+        <p>A header-only, binary-agnostic crash handler for C++ applications. Drop it into any project — no build system changes required.</p>
+
+        <h3>Setup</h3>
+        <p>Copy <code>cpp_integration/debugai_handler.h</code> into your project:</p>
+
+        <pre><code><span class="code-purple">#include</span> <span class="code-green">"debugai_handler.h"</span>
+
+<span class="code-blue">int</span> main() {
+    debugai::install_crash_handler(<span class="code-green">"logs/"</span>);  <span class="code-comment">// output directory</span>
+    
+    <span class="code-comment">// ... rest of your application code</span>
+    <span class="code-blue">return</span> <span class="code-yellow">0</span>;
+}</code></pre>
+
+        <h3>Compile with debug symbols</h3>
+        <pre><code>g++ -g your_app.cpp -o your_app</code></pre>
+
+        <div class="callout callout-warn">
+            <span class="callout-icon">⚠️</span>
+            <div>The <code>-g</code> flag is required. Without debug symbols, Roota cannot resolve memory addresses to source lines.</div>
+        </div>
+
+        <h3>What gets captured</h3>
+        <p>When your application crashes with a segmentation fault (SIGSEGV), the handler automatically writes a timestamped crash report:</p>
+
+        <pre><code>logs/crash_report_20260615_143022.log</code></pre>
+
+        <p>Containing:</p>
+        <pre><code>BASE_MAP: 60b82188b000-60b82188d000 r--p 00000000 ... /path/to/your/binary
+SIGNAL: 11
+CRASH_ADDRESS: 0x60b82188d451</code></pre>
+
+        <h3>Analyze the crash</h3>
+        <pre><code>python debugai.py --log service.log \
+    --repo owner/repo \
+    --crash-report logs/crash_report_20260615_143022.log</code></pre>
+
+        <div class="callout callout-info">
+            <span class="callout-icon">ℹ️</span>
+            <div>C++ crash analysis requires WSL (Windows Subsystem for Linux) on Windows, or a native Linux environment. <code>addr2line</code> must be installed (<code>sudo apt install binutils</code>).</div>
+        </div>
+
+        <!-- API REFERENCE -->
+        <h2 id="api-analyze">POST /analyze</h2>
+        <p>Analyzes a log file and returns an AI-powered diagnosis. Requires authentication.</p>
+
+        <h3>Request</h3>
+        <pre><code>POST http://127.0.0.1:8000/analyze
+Content-Type: multipart/form-data
+X-API-Key: your_api_key
+
+log_file: &lt;file&gt;
+repo: owner/repo-name  <span class="code-comment">(optional)</span></code></pre>
+
+        <h3>Response</h3>
+        <pre><code>{
+  <span class="code-green">"status"</span>: <span class="code-yellow">"success"</span>,
+  <span class="code-green">"incident_id"</span>: <span class="code-yellow">42</span>,
+  <span class="code-green">"stats"</span>: {
+    <span class="code-green">"total_lines"</span>: <span class="code-yellow">8</span>,
+    <span class="code-green">"errors"</span>: <span class="code-yellow">5</span>,
+    <span class="code-green">"warnings"</span>: <span class="code-yellow">2</span>
+  },
+  <span class="code-green">"errors"</span>: [...],
+  <span class="code-green">"warnings"</span>: [...],
+  <span class="code-green">"diagnosis"</span>: <span class="code-yellow">"INCIDENT SUMMARY: ..."</span>
+}</code></pre>
+
+        <h2 id="api-ingest">POST /ingest</h2>
+        <p>Receives crash data from SDKs and auto-capture handlers. Used by the Python SDK automatically.</p>
+
+        <h3>Request</h3>
+        <pre><code>POST http://127.0.0.1:8000/ingest
+Content-Type: application/json
+
+{
+  <span class="code-green">"log_text"</span>: <span class="code-yellow">"2024-03-10 ERROR [Service] ..."</span>,
+  <span class="code-green">"repo"</span>: <span class="code-yellow">"owner/repo"</span>,
+  <span class="code-green">"source"</span>: <span class="code-yellow">"python_sdk"</span>
+}</code></pre>
+
+        <h2 id="api-incidents">GET /incidents</h2>
+        <p>Returns all incidents for the authenticated user, ordered by most recent first.</p>
+
+        <pre><code>GET http://127.0.0.1:8000/incidents
+X-API-Key: your_api_key</code></pre>
+
+        <h2 id="api-feedback">POST /incidents/{id}/feedback</h2>
+        <p>Submit feedback on a diagnosis. Used to build organizational knowledge over time.</p>
+
+        <pre><code>POST http://127.0.0.1:8000/incidents/42/feedback?rating=correct
+X-API-Key: your_api_key</code></pre>
+
+        <!-- LOG FORMATS -->
+        <h2 id="log-formats">Log Formats</h2>
+        <p>Roota's parser handles any log format automatically using a two-stage approach:</p>
+
+        <h3>Stage 1 — Regex parser (fast, free)</h3>
+        <p>Handles the standard structured format:</p>
+        <pre><code>2024-03-10 14:22:01 ERROR [UserService] KeyError: 9981</code></pre>
+
+        <h3>Stage 2 — AI parser (any format)</h3>
+        <p>If fewer than 2 lines match the regex, Roota automatically falls back to AI parsing, which handles:</p>
+        <ul style="color:#aaa; padding-left:20px; line-height:2; font-size:0.925rem; margin-bottom:16px;">
+            <li>Python tracebacks</li>
+            <li>JSON structured logs</li>
+            <li>Node.js / Winston logs</li>
+            <li>Java / Log4j logs</li>
+            <li>Nginx error logs</li>
+            <li>Any custom format</li>
+        </ul>
+
+        <!-- GITHUB INTEGRATION -->
+        <h2 id="github-integration">GitHub Integration</h2>
+        <p>When you provide a <code>--repo</code> argument, Roota fetches your actual source files from GitHub to produce grounded diagnoses with exact variable names and line references.</p>
+
+        <h3>File disambiguation</h3>
+        <p>Real codebases often have files with the same name in different folders. Roota uses a three-stage pipeline to find the correct file:</p>
+        <ol style="color:#aaa; padding-left:20px; line-height:2; font-size:0.925rem;">
+            <li><strong>Filename match</strong> — find all files matching the name from the log</li>
+            <li><strong>Test file filter</strong> — prefer non-test paths for production crash analysis</li>
+            <li><strong>Function verification</strong> — fetch candidate files and check which one contains the function named in the traceback</li>
+        </ol>
+
+        <div class="callout callout-info">
+            <span class="callout-icon">ℹ️</span>
+            <div>Roota automatically detects your default branch — works with <code>main</code>, <code>master</code>, <code>develop</code>, or any other branch name.</div>
+        </div>
+
+        <!-- C++ CRASHES -->
+        <h2 id="cpp-crashes">C++ Crash Analysis</h2>
+        <p>C++ production crashes produce raw memory addresses, not human-readable stack traces. Roota resolves these addresses to exact source lines using <code>addr2line</code>.</p>
+
+        <h3>The pipeline</h3>
+        <ol style="color:#aaa; padding-left:20px; line-height:2; font-size:0.925rem;">
+            <li>Your app crashes → signal handler captures <code>BASE_MAP</code> and <code>CRASH_ADDRESS</code></li>
+            <li>Roota calculates: <code>file_offset = crash_address - base_address</code></li>
+            <li>Runs: <code>addr2line -e your_binary 0xoffset</code></li>
+            <li>Gets: <code>source_file.cpp:line_number</code></li>
+            <li>Fetches that file from GitHub and produces a 10/10 confidence diagnosis</li>
+        </ol>
+
+        <div class="callout callout-warn">
+            <span class="callout-icon">⚠️</span>
+            <div>C++ crash analysis requires binaries compiled with <code>-g</code> debug symbols. Stripped production binaries will produce lower confidence diagnoses.</div>
+        </div>
+
+        <hr>
+
+        <p style="color:var(--muted2); font-size:0.8rem; text-align:center; padding-bottom:40px;">
+            Roota v0.1.0 — Built for engineers who take production seriously.
+        </p>
+
+    </main>
+</div>
+
+<script>
+    // Highlight active sidebar link on scroll
+    const sections = document.querySelectorAll('[id]');
+    const links = document.querySelectorAll('.sidebar-link');
+
+    window.addEventListener('scroll', () => {
+        let current = '';
+        sections.forEach(s => {
+            if (window.scrollY >= s.offsetTop - 100) current = s.id;
+        });
+        links.forEach(l => {
+            l.classList.remove('active');
+            if (l.getAttribute('href') === '#' + current) l.classList.add('active');
+        });
+    });
+</script>
+</body>
+</html>
