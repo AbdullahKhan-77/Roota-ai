@@ -1,9 +1,0 @@
-2024-01-15 03:42:11 ERROR [UserService] Segmentation fault (core dumped)
-2024-01-15 03:42:11 ERROR [UserService] Process terminated with signal 11
-2024-01-15 03:42:10 WARNING [UserService] Memory usage at 94% threshold
-2024-01-15 03:42:09 INFO [UserService] Processing request for user_id=8821
-2024-01-15 03:42:08 INFO [UserService] Cache miss for session key: sess_abc123
-2024-01-15 03:42:07 ERROR [Database] Connection timeout after 30s
-2024-01-15 03:42:06 INFO [UserService] Received POST /api/users/login
-2024-01-15 03:42:12 ERROR [AuthService] JWT token validation failed for user_id=8821
-2024-01-15 03:42:13 ERROR [AuthService] Rate limit exceeded: 500 requests in 60 seconds

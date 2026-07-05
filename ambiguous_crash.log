@@ -1,2 +1,0 @@
-2024-04-01 09:00:00 ERROR [UserService] KeyError: 5050
-2024-04-01 09:00:00 ERROR [UserService] Traceback: user_session.py line 6, in get_session
