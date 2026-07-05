@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roota — Sign In</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #0a0a0f;
+            color: #e6edf3;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .auth-container {
+            width: 100%;
+            max-width: 420px;
+            padding: 20px;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .logo h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.05em;
+        }
+
+        .logo p {
+            color: #6b7280;
+            font-size: 0.875rem;
+            margin-top: 6px;
+        }
+
+        .card {
+            background: #111118;
+            border: 1px solid #1f1f2e;
+            border-radius: 12px;
+            padding: 32px;
+        }
+
+        .tabs {
+            display: flex;
+            background: #0a0a0f;
+            border-radius: 8px;
+            padding: 4px;
+            margin-bottom: 28px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 8px;
+            text-align: center;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #6b7280;
+            transition: all 0.2s;
+            border: none;
+            background: transparent;
+        }
+
+        .tab.active {
+            background: #1f1f2e;
+            color: #e6edf3;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.8rem;
+            color: #6b7280;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 16px;
+            background: #0a0a0f;
+            border: 1px solid #1f1f2e;
+            border-radius: 8px;
+            color: #e6edf3;
+            font-size: 0.875rem;
+            transition: border-color 0.2s;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: #6366f1;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            margin-top: 8px;
+        }
+
+        .submit-btn:hover { opacity: 0.9; }
+        .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .error {
+            background: #1a0a0a;
+            border: 1px solid #7f1d1d;
+            border-radius: 6px;
+            padding: 10px 14px;
+            color: #f87171;
+            font-size: 0.8rem;
+            margin-top: 16px;
+            display: none;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 24px;
+            color: #6b7280;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="logo">
+            <h1>Roota</h1>
+            <p>AI-powered production debugger</p>
+        </div>
+
+        <div class="card">
+            <div class="tabs">
+                <button class="tab active" id="signupTab" onclick="switchTab('signup')">Sign Up</button>
+                <button class="tab" id="loginTab" onclick="switchTab('login')">Log In</button>
+            </div>
+
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="email" placeholder="you@company.com" autocomplete="email">
+            </div>
+
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="password" placeholder="••••••••" autocomplete="current-password">
+            </div>
+
+            <button class="submit-btn" id="submitBtn" onclick="submit()">Create Account</button>
+
+            <div class="error" id="errorMsg"></div>
+        </div>
+
+        <div class="footer">
+            Root cause analysis, automatically.
+        </div>
+    </div>
+
+    <script>
+        let mode = 'signup';
+
+        if (localStorage.getItem('roota_api_key')) {
+            window.location.href = '/ui';
+        }
+
+        function switchTab(tab) {
+            mode = tab;
+            document.getElementById('signupTab').className = 'tab' + (tab === 'signup' ? ' active' : '');
+            document.getElementById('loginTab').className = 'tab' + (tab === 'login' ? ' active' : '');
+            document.getElementById('submitBtn').textContent = tab === 'signup' ? 'Create Account' : 'Log In';
+            document.getElementById('errorMsg').style.display = 'none';
+        }
+
+        async function submit() {
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const btn = document.getElementById('submitBtn');
+            const errorEl = document.getElementById('errorMsg');
+
+            if (!email || !password) {
+                errorEl.textContent = 'Please enter your email and password';
+                errorEl.style.display = 'block';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = mode === 'signup' ? 'Creating account...' : 'Logging in...';
+
+            const formData = new FormData();
+            formData.append('email', email);
+            formData.append('password', password);
+
+            try {
+                const endpoint = mode === 'signup' ? '/register' : '/login';
+                const response = await fetch(`http://127.0.0.1:8000${endpoint}`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+
+                if (data.error) {
+                    errorEl.textContent = data.error;
+                    errorEl.style.display = 'block';
+                    return;
+                }
+
+                localStorage.setItem('roota_api_key', data.api_key);
+                localStorage.setItem('roota_email', data.email);
+                window.location.href = '/ui';
+
+            } catch (error) {
+                errorEl.textContent = 'Could not connect to server. Make sure Roota is running.';
+                errorEl.style.display = 'block';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = mode === 'signup' ? 'Create Account' : 'Log In';
+            }
+        }
+
+        document.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') submit();
+        });
+    </script>
+</body>
+</html>

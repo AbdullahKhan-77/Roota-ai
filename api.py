@@ -10,7 +10,7 @@ from parser import parse_log_file, display_results, extract_filenames, extract_f
 from ai import analyze_logs
 from github import fetch_file_from_github, get_repo_file_tree, find_full_path, find_file_by_function, get_default_branch
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, RedirectResponse
 
 
 app = FastAPI(title="debugai API", version="0.1.0")
@@ -30,7 +30,11 @@ app.add_middleware(
 )
 @app.get("/")
 def root():
-    return {"message": "debugai API is running", "version": "0.1.0"}
+    return RedirectResponse(url="/login")
+
+@app.get("/login")
+def serve_login():
+    return FileResponse("login.html")
 
 @app.post("/analyze")
 async def analyze(
