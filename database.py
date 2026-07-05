@@ -25,7 +25,7 @@ def init_db():
             diagnosis TEXT,
             total_lines INTEGER,
             error_count INTEGER,
-            warning_count INTEGER
+            warning_count INTEGER,
             feedback TEXT
         )
     ''')
