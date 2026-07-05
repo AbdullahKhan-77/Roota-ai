@@ -265,6 +265,97 @@
                 <pre id="diagnosisText"></pre>
             </div>
         </div>
+        <div style="margin-top:40px;">
+            <h2 style="color:#8b949e; font-size:1rem; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:16px;">Integrate</h2>
+            
+            <div style="display:flex; gap:12px; margin-bottom:16px;">
+                <button class="sdk-tab active" id="sdkPython" onclick="switchSdk('python')"
+                    style="width:auto; padding:8px 20px; background:#238636; border:none; border-radius:6px; color:white; font-size:0.875rem; cursor:pointer;">
+                    Python
+                </button>
+                <button class="sdk-tab" id="sdkCpp" onclick="switchSdk('cpp')"
+                    style="width:auto; padding:8px 20px; background:#21262d; border:none; border-radius:6px; color:white; font-size:0.875rem; cursor:pointer;">
+                    C++
+                </button>
+            </div>
+
+            <div id="sdkPythonSection" class="card">
+                <h2>Python Auto-Capture</h2>
+                <p style="color:#8b949e; font-size:0.875rem; margin-bottom:16px;">
+                    Add two lines to your Python app. Every unhandled exception gets automatically captured, analyzed, and stored.
+                </p>
+
+                <p style="color:#8b949e; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:8px;">1. Copy debugai_sdk.py into your project</p>
+                <div style="background:#0d1117; border:1px solid #30363d; border-radius:6px; padding:16px; margin-bottom:16px; position:relative;">
+                    <pre style="color:#e6edf3; font-family:monospace; font-size:0.875rem; margin:0;">cp debugai_sdk.py /your/project/</pre>
+                </div>
+
+                <p style="color:#8b949e; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:8px;">2. Add to your app</p>
+                <div style="background:#0d1117; border:1px solid #30363d; border-radius:6px; padding:16px; margin-bottom:16px; position:relative;">
+                    <pre id="pythonCode" style="color:#e6edf3; font-family:monospace; font-size:0.875rem; margin:0;">import debugai_sdk
+
+debugai_sdk.install(
+    repo="owner/your-repo",
+    server="http://127.0.0.1:8000"
+)</pre>
+                    <button onclick="copyCode('pythonCode')" 
+                        style="position:absolute; top:8px; right:8px; width:auto; padding:4px 12px; background:#21262d; border:1px solid #30363d; border-radius:4px; color:#8b949e; font-size:0.75rem; cursor:pointer;">
+                        Copy
+                    </button>
+                </div>
+
+                <div style="background:#1a3a2a; border:1px solid #238636; border-radius:6px; padding:12px;">
+                    <p style="color:#3fb950; font-size:0.875rem; margin:0;">
+                        ✓ Works with any Python app — Django, Flask, FastAPI, scripts, services
+                    </p>
+                </div>
+            </div>
+
+            <div id="sdkCppSection" class="card hidden">
+                <h2>C++ Crash Handler</h2>
+                <p style="color:#8b949e; font-size:0.875rem; margin-bottom:16px;">
+                    Header-only, binary-agnostic crash handler. Automatically captures crash address, memory map, and signal — no debugger required.
+                </p>
+
+                <p style="color:#8b949e; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:8px;">1. Copy header into your project</p>
+                <div style="background:#0d1117; border:1px solid #30363d; border-radius:6px; padding:16px; margin-bottom:16px;">
+                    <pre style="color:#e6edf3; font-family:monospace; font-size:0.875rem; margin:0;">cp cpp_integration/debugai_handler.h /your/project/</pre>
+                </div>
+
+                <p style="color:#8b949e; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:8px;">2. Add to your main.cpp</p>
+                <div style="background:#0d1117; border:1px solid #30363d; border-radius:6px; padding:16px; margin-bottom:16px; position:relative;">
+                    <pre id="cppCode" style="color:#e6edf3; font-family:monospace; font-size:0.875rem; margin:0;">#include "debugai_handler.h"
+
+int main() {
+    debugai::install_crash_handler("logs/");
+    
+    // ... rest of your code
+}</pre>
+                    <button onclick="copyCode('cppCode')"
+                        style="position:absolute; top:8px; right:8px; width:auto; padding:4px 12px; background:#21262d; border:1px solid #30363d; border-radius:4px; color:#8b949e; font-size:0.75rem; cursor:pointer;">
+                        Copy
+                    </button>
+                </div>
+
+                <p style="color:#8b949e; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:8px;">3. Compile with debug symbols</p>
+                <div style="background:#0d1117; border:1px solid #30363d; border-radius:6px; padding:16px; margin-bottom:16px;">
+                    <pre style="color:#e6edf3; font-family:monospace; font-size:0.875rem; margin:0;">g++ -g your_app.cpp -o your_app</pre>
+                </div>
+
+                <p style="color:#8b949e; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:8px;">4. Analyze the crash report</p>
+                <div style="background:#0d1117; border:1px solid #30363d; border-radius:6px; padding:16px; margin-bottom:16px;">
+                    <pre style="color:#e6edf3; font-family:monospace; font-size:0.875rem; margin:0;">python debugai.py --log service.log \
+    --repo owner/repo \
+    --crash-report logs/crash_report_*.log</pre>
+                </div>
+
+                <div style="background:#1a3a2a; border:1px solid #238636; border-radius:6px; padding:12px;">
+                    <p style="color:#3fb950; font-size:0.875rem; margin:0;">
+                        ✓ Header-only — no dependencies, no build system changes required
+                    </p>
+                </div>
+            </div>
+        </div>
     </div>
     <div style="margin-top:40px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
@@ -413,6 +504,32 @@
             } catch (error) {
                 console.error('Could not submit feedback:', error);
             }
+        }
+    function switchSdk(sdk) {
+            if (sdk === 'python') {
+                document.getElementById('sdkPythonSection').classList.remove('hidden');
+                document.getElementById('sdkCppSection').classList.add('hidden');
+                document.getElementById('sdkPython').style.background = '#238636';
+                document.getElementById('sdkCpp').style.background = '#21262d';
+            } else {
+                document.getElementById('sdkPythonSection').classList.add('hidden');
+                document.getElementById('sdkCppSection').classList.remove('hidden');
+                document.getElementById('sdkPython').style.background = '#21262d';
+                document.getElementById('sdkCpp').style.background = '#238636';
+            }
+        }
+
+    function copyCode(elementId) {
+            const code = document.getElementById(elementId).textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                const btn = event.target;
+                btn.textContent = 'Copied!';
+                btn.style.color = '#3fb950';
+                setTimeout(() => {
+                    btn.textContent = 'Copy';
+                    btn.style.color = '#8b949e';
+                }, 2000);
+            });
         }
     </script>
 </body>
