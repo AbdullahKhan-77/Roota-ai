@@ -3,636 +3,1550 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>debugai — AI-powered production debugger</title>
+    <title>Roota — Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
+        :root {
+            --bg: #0a0a0f;
+            --sidebar: #0d0d14;
+            --surface: #111118;
+            --surface2: #1a1a2a;
+            --border: #1f1f2e;
+            --blue: #3B82F6;
+            --blue-dim: #3B82F615;
+            --text: #F9FAFB;
+            --muted: #6B7280;
+            --muted2: #374151;
+            --green: #10B981;
+            --red: #EF4444;
+            --amber: #F59E0B;
+            --critical: #EF4444;
+            --warning: #F59E0B;
+            --info: #3B82F6;
+        }
+
         body {
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            background: #0d1117;
-            color: #e6edf3;
+            font-family: 'Space Grotesk', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            display: flex;
             min-height: 100vh;
-            padding: 40px 20px;
+            overflow-x: hidden;
         }
 
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
+        /* ── SIDEBAR ── */
+        .sidebar {
+            width: 210px;
+            flex-shrink: 0;
+            background: var(--sidebar);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0; left: 0; bottom: 0;
+            z-index: 50;
         }
 
-        header {
-            margin-bottom: 40px;
+        .sidebar-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 20px 16px 16px;
+            border-bottom: 1px solid var(--border);
+            text-decoration: none;
         }
 
-        header h1 {
-            font-size: 2rem;
-            color: #58a6ff;
-            margin-bottom: 8px;
+        .brand-icon { width: 30px; height: 30px; flex-shrink: 0; }
+
+        .brand-text { display: flex; flex-direction: column; }
+        .brand-name { font-size: 1rem; font-weight: 700; color: var(--text); line-height: 1.2; }
+        .brand-sub { font-size: 0.68rem; color: var(--muted); }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 16px 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
         }
 
-        header p {
-            color: #8b949e;
-            font-size: 1rem;
-        }
-
-        .card {
-            background: #161b22;
-            border: 1px solid #30363d;
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 12px;
             border-radius: 8px;
-            padding: 24px;
-            margin-bottom: 24px;
-        }
-
-        .card h2 {
-            font-size: 1rem;
-            color: #8b949e;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-bottom: 16px;
-        }
-
-        .form-group {
-            margin-bottom: 16px;
-        }
-
-        label {
-            display: block;
+            color: var(--muted);
+            text-decoration: none;
             font-size: 0.875rem;
-            color: #8b949e;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .nav-item:hover { background: var(--surface2); color: var(--text); }
+        .nav-item.active { background: var(--blue-dim); color: var(--blue); }
+
+        .nav-icon { width: 16px; height: 16px; flex-shrink: 0; opacity: 0.7; }
+        .nav-item.active .nav-icon { opacity: 1; }
+
+        .sidebar-bottom {
+            padding: 12px 8px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .new-analysis-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin: 12px 8px;
+            padding: 10px;
+            background: var(--blue);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .new-analysis-btn:hover { background: #2563eb; transform: translateY(-1px); }
+
+        /* ── MAIN ── */
+        .main {
+            margin-left: 210px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* ── TOPBAR ── */
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 28px;
+            border-bottom: 1px solid var(--border);
+            background: var(--sidebar);
+            position: sticky;
+            top: 0;
+            z-index: 40;
+        }
+
+        .topbar-left h1 {
+            font-size: 1.4rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        .topbar-left p {
+            font-size: 0.78rem;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .env-badge {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            padding: 7px 14px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.78rem;
+            font-weight: 500;
+            color: var(--text);
+            cursor: pointer;
+        }
+
+        .env-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--green);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+        .icon-btn {
+            width: 34px;
+            height: 34px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--muted);
+            transition: all 0.15s;
+            font-size: 0.85rem;
+        }
+
+        .icon-btn:hover { color: var(--text); border-color: #444; }
+
+        .user-avatar {
+            width: 34px;
+            height: 34px;
+            background: var(--blue-dim);
+            border: 1px solid rgba(59,130,246,0.3);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--blue);
+            cursor: pointer;
+        }
+
+        /* ── VIEWS ── */
+        .view { display: none; padding: 28px; }
+        .view.active { display: block; }
+
+        /* ── OVERVIEW GRID ── */
+        .overview-grid {
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 20px;
+        }
+
+        /* ── CARD ── */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .card-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        /* ── ANALYZE CARD ── */
+        .analyze-tabs {
+            display: flex;
+            gap: 0;
+            padding: 0 20px;
+            border-bottom: 1px solid var(--border);
+            background: var(--surface);
+        }
+
+        .analyze-tab {
+            padding: 12px 16px;
+            font-size: 0.82rem;
+            font-weight: 500;
+            color: var(--muted);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1px;
+            transition: all 0.15s;
+            border-top: none;
+            border-left: none;
+            border-right: none;
+            background: transparent;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .analyze-tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+
+        .analyze-body { padding: 20px; }
+
+        .repo-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .repo-label { font-size: 0.78rem; color: var(--muted); }
+
+        .repo-select {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.78rem;
+            font-weight: 500;
+            color: var(--text);
+            cursor: pointer;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .log-textarea {
+            width: 100%;
+            min-height: 180px;
+            padding: 16px;
+            background: #0a0a0f;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: #6B7280;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.78rem;
+            line-height: 1.7;
+            resize: vertical;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .log-textarea:focus { border-color: var(--blue); color: var(--text); }
+
+        .log-file-drop {
+            min-height: 180px;
+            border: 1px dashed var(--border);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: var(--muted);
+            font-size: 0.82rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #0a0a0f;
+            position: relative;
+        }
+
+        .log-file-drop:hover { border-color: var(--blue); color: var(--text); }
+        .log-file-drop input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+
+        .analyze-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .btn-analyze {
+            flex: 1;
+            padding: 11px;
+            background: var(--blue);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .btn-analyze:hover { background: #2563eb; }
+        .btn-analyze:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .repo-input {
+            flex: 1;
+            padding: 8px 12px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            font-size: 0.78rem;
+            font-family: 'Space Grotesk', sans-serif;
+            outline: none;
+        }
+
+        .repo-input:focus { border-color: var(--blue); }
+        .repo-input::placeholder { color: var(--muted2); }
+
+        /* ── RESULT CARD ── */
+        .result-card {
+            margin-top: 16px;
+            display: none;
+        }
+
+        .result-body {
+            padding: 20px;
+        }
+
+        .result-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .stat-box {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .stat-box .num { font-size: 1.5rem; font-weight: 800; }
+        .stat-box .lbl { font-size: 0.68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 2px; }
+
+        .diagnosis-text {
+            background: #0a0a0f;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.76rem;
+            line-height: 1.8;
+            color: #e2e8f0;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        /* ── INCIDENTS PANEL ── */
+        .incidents-panel { display: flex; flex-direction: column; gap: 20px; }
+
+        .incidents-list { display: flex; flex-direction: column; }
+
+        .incident-item {
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--border);
+            transition: background 0.15s;
+            cursor: pointer;
+        }
+
+        .incident-item:hover { background: rgba(255,255,255,0.02); }
+        .incident-item:last-child { border-bottom: none; }
+
+        .incident-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             margin-bottom: 6px;
         }
 
-        input[type="text"],
-        input[type="file"] {
-            width: 100%;
-            padding: 10px 14px;
-            background: #0d1117;
-            border: 1px solid #30363d;
-            border-radius: 6px;
-            color: #e6edf3;
-            font-size: 0.875rem;
+        .severity-badge {
+            font-size: 0.62rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            padding: 2px 7px;
+            border-radius: 4px;
         }
 
-        input[type="file"] {
-            padding: 8px;
+        .sev-critical { background: rgba(239,68,68,0.15); color: #fca5a5; border: 1px solid rgba(239,68,68,0.3); }
+        .sev-warning { background: rgba(245,158,11,0.15); color: #fcd34d; border: 1px solid rgba(245,158,11,0.3); }
+        .sev-info { background: rgba(59,130,246,0.15); color: #93c5fd; border: 1px solid rgba(59,130,246,0.3); }
+
+        .incident-time { font-size: 0.72rem; color: var(--muted); }
+
+        .incident-msg {
+            font-size: 0.82rem;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--text);
+        }
+
+        .incident-actions { display: flex; gap: 6px; }
+
+        .inc-btn {
+            padding: 4px 10px;
+            border-radius: 5px;
+            font-size: 0.7rem;
+            font-weight: 500;
             cursor: pointer;
+            transition: all 0.15s;
+            font-family: 'Space Grotesk', sans-serif;
+            border: 1px solid var(--border);
+            background: var(--surface2);
+            color: var(--muted);
         }
 
-        button {
-            width: 100%;
-            padding: 12px;
-            background: #238636;
-            border: none;
+        .inc-btn:hover { color: var(--text); border-color: #444; }
+        .inc-btn.correct:hover { color: #6ee7b7; border-color: rgba(16,185,129,0.4); background: rgba(16,185,129,0.1); }
+        .inc-btn.incorrect:hover { color: #fca5a5; border-color: rgba(239,68,68,0.4); background: rgba(239,68,68,0.1); }
+        .inc-btn.marked-correct { color: #6ee7b7; border-color: rgba(16,185,129,0.4); background: rgba(16,185,129,0.1); }
+        .inc-btn.marked-incorrect { color: #fca5a5; border-color: rgba(239,68,68,0.4); background: rgba(239,68,68,0.1); }
+
+        /* ── SDK CARD ── */
+        .sdk-tabs { display: flex; gap: 6px; }
+
+        .sdk-tab {
+            padding: 5px 14px;
             border-radius: 6px;
-            color: white;
-            font-size: 1rem;
+            font-size: 0.75rem;
             font-weight: 600;
             cursor: pointer;
-            transition: background 0.2s;
+            border: none;
+            background: var(--surface2);
+            color: var(--muted);
+            transition: all 0.15s;
+            font-family: 'Space Grotesk', sans-serif;
         }
 
-        button:hover { background: #2ea043; }
-        button:disabled { background: #21262d; color: #8b949e; cursor: not-allowed; }
+        .sdk-tab.active { background: var(--blue); color: white; }
 
-        .stats {
+        .sdk-body { padding: 0 20px 20px; }
+
+        .code-block {
+            background: #0a0a0f;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            position: relative;
+            margin-top: 14px;
+        }
+
+        .code-block pre {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.76rem;
+            line-height: 1.8;
+            color: #e2e8f0;
+            overflow-x: auto;
+            background: none;
+            border: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .copy-code-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 28px;
+            height: 28px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--muted);
+            font-size: 0.75rem;
+            transition: all 0.15s;
+        }
+
+        .copy-code-btn:hover { color: var(--text); }
+
+        /* ── THROUGHPUT CHART ── */
+        .chart-label {
+            font-size: 0.68rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--muted);
+            padding: 14px 20px 8px;
+        }
+
+        .chart-bars {
+            display: flex;
+            align-items: flex-end;
+            gap: 4px;
+            height: 80px;
+            padding: 0 20px 12px;
+        }
+
+        .chart-bar {
+            flex: 1;
+            background: var(--surface2);
+            border-radius: 3px 3px 0 0;
+            transition: background 0.2s;
+            min-height: 4px;
+        }
+
+        .chart-bar.highlight { background: var(--blue); }
+        .chart-bar:hover { background: var(--blue); opacity: 0.8; }
+
+        .chart-labels {
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px 14px;
+        }
+
+        .chart-labels span { font-size: 0.65rem; color: var(--muted2); }
+
+        /* ── INCIDENTS VIEW ── */
+        .incidents-view-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .filter-row { display: flex; gap: 8px; }
+
+        .filter-btn {
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 0.78rem;
+            font-weight: 500;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--muted);
+            transition: all 0.15s;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .filter-btn.active { background: var(--blue-dim); color: var(--blue); border-color: rgba(59,130,246,0.3); }
+
+        .incidents-table {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .table-header {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: 80px 1fr 120px 100px 80px;
+            gap: 0;
+            padding: 10px 20px;
+            background: var(--surface2);
+            border-bottom: 1px solid var(--border);
+            font-size: 0.68rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--muted);
+        }
+
+        .table-row {
+            display: grid;
+            grid-template-columns: 80px 1fr 120px 100px 80px;
+            gap: 0;
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--border);
+            align-items: center;
+            transition: background 0.15s;
+            cursor: pointer;
+        }
+
+        .table-row:hover { background: rgba(255,255,255,0.02); }
+        .table-row:last-child { border-bottom: none; }
+
+        .table-row .cell { font-size: 0.82rem; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding-right: 12px; }
+        .table-row .cell.primary { color: var(--text); font-weight: 500; }
+
+        /* ── PROFILE VIEW ── */
+        .profile-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            max-width: 800px;
+        }
+
+        .profile-card { padding: 24px; }
+
+        .profile-avatar-section {
+            display: flex;
+            align-items: center;
             gap: 16px;
             margin-bottom: 24px;
         }
 
-        .stat {
-            background: #161b22;
-            border: 1px solid #30363d;
-            border-radius: 8px;
-            padding: 20px;
-            text-align: center;
+        .profile-avatar-large {
+            width: 64px;
+            height: 64px;
+            background: var(--blue-dim);
+            border: 2px solid rgba(59,130,246,0.3);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--blue);
         }
 
-        .stat .number {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #58a6ff;
-        }
+        .profile-info h2 { font-size: 1.1rem; font-weight: 700; }
+        .profile-info p { font-size: 0.8rem; color: var(--muted); margin-top: 2px; }
 
-        .stat.errors .number { color: #f85149; }
-        .stat.warnings .number { color: #e3b341; }
-
-        .stat .label {
-            font-size: 0.75rem;
-            color: #8b949e;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-top: 4px;
-        }
-
-        .diagnosis {
-            background: #161b22;
-            border: 1px solid #30363d;
-            border-radius: 8px;
-            padding: 24px;
-        }
-
-        .diagnosis h2 {
-            font-size: 1rem;
-            color: #8b949e;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
+        .profile-field {
             margin-bottom: 16px;
         }
 
-        .diagnosis pre {
-            white-space: pre-wrap;
-            font-family: 'Cascadia Code', 'Fira Code', monospace;
-            font-size: 0.875rem;
-            line-height: 1.6;
-            color: #e6edf3;
+        .profile-label {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--muted);
+            margin-bottom: 7px;
         }
 
-        .error-table {
+        .profile-value {
             width: 100%;
-            border-collapse: collapse;
+            padding: 10px 14px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
             font-size: 0.875rem;
+            font-family: 'Space Grotesk', sans-serif;
+            outline: none;
+            transition: border-color 0.2s;
         }
 
-        .error-table th {
-            text-align: left;
-            padding: 8px 12px;
-            color: #8b949e;
-            border-bottom: 1px solid #30363d;
-            font-weight: 500;
+        .profile-value:focus { border-color: var(--blue); }
+        .profile-value:disabled { color: var(--muted); cursor: default; }
+        .profile-value::placeholder { color: var(--muted2); }
+
+        .profile-api-key {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--muted);
+            background: #0a0a0f;
+            letter-spacing: 0.02em;
         }
 
-        .error-table td {
-            padding: 8px 12px;
-            border-bottom: 1px solid #21262d;
+        .btn-save {
+            width: 100%;
+            padding: 10px;
+            background: var(--blue);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Space Grotesk', sans-serif;
+            margin-top: 8px;
         }
 
-        .error-table tr:last-child td { border-bottom: none; }
+        .btn-save:hover { background: #2563eb; }
 
-        .badge-error { color: #f85149; font-weight: 600; }
-        .badge-warning { color: #e3b341; font-weight: 600; }
+        .success-msg {
+            background: rgba(16,185,129,0.1);
+            border: 1px solid rgba(16,185,129,0.3);
+            border-radius: 6px;
+            padding: 8px 14px;
+            color: #6ee7b7;
+            font-size: 0.8rem;
+            margin-top: 10px;
+            display: none;
+        }
 
-        .loading {
+        .error-msg {
+            background: rgba(239,68,68,0.1);
+            border: 1px solid rgba(239,68,68,0.3);
+            border-radius: 6px;
+            padding: 8px 14px;
+            color: #fca5a5;
+            font-size: 0.8rem;
+            margin-top: 10px;
+            display: none;
+        }
+
+        /* ── LOADING ── */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(10,10,15,0.7);
+            backdrop-filter: blur(4px);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .loading-overlay.show { display: flex; }
+
+        .spinner {
+            width: 36px;
+            height: 36px;
+            border: 3px solid var(--border);
+            border-top-color: var(--blue);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .loading-text {
+            font-size: 0.875rem;
+            color: var(--muted);
+        }
+
+        /* ── FOOTER ── */
+        .dashboard-footer {
+            padding: 16px 28px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--sidebar);
+        }
+
+        .dashboard-footer p { font-size: 0.75rem; color: var(--muted2); }
+
+        .footer-links { display: flex; gap: 20px; }
+        .footer-links a { font-size: 0.75rem; color: var(--muted2); text-decoration: none; transition: color 0.2s; }
+        .footer-links a:hover { color: var(--muted); }
+
+        /* ── EMPTY STATE ── */
+        .empty-state {
+            padding: 48px 20px;
             text-align: center;
-            padding: 40px;
-            color: #8b949e;
+            color: var(--muted);
         }
 
-        .hidden { display: none; }
+        .empty-state p { font-size: 0.875rem; margin-top: 8px; }
     </style>
 </head>
 <body>
-    <div class="container">
- <header style="display:flex; justify-content:space-between; align-items:center; margin-bottom:40px;">
-            <div>
-                <h1 style="font-size:2rem; color:#6366f1; margin-bottom:4px;">Roota</h1>
-                <p style="color:#6b7280; font-size:0.875rem;">AI-powered production debugger</p>
-            </div>
-            <div style="display:flex; align-items:center; gap:12px;">
-                <span id="userEmail" style="color:#6b7280; font-size:0.875rem;"></span>
-                <button onclick="logout()" style="width:auto; padding:8px 16px; background:#111118; border:1px solid #1f1f2e; border-radius:6px; color:#6b7280; font-size:0.875rem; cursor:pointer;">
-                    Logout
-                </button>
-            </div>
-        </header>
 
-        <div class="card">
-            <h2>Analyze Logs</h2>
+<!-- LOADING OVERLAY -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <div class="loading-text" id="loadingText">Analyzing logs...</div>
+</div>
 
-            <div class="form-group">
-                <div style="display:flex; gap:12px; margin-bottom:16px;">
-                    <button class="tab-btn active" id="tabUpload" onclick="switchTab('upload')" 
-                        style="width:auto; padding:8px 20px; background:#238636; font-size:0.875rem;">
-                        Upload File
-                    </button>
-                    <button class="tab-btn" id="tabPaste" onclick="switchTab('paste')"
-                        style="width:auto; padding:8px 20px; background:#21262d; font-size:0.875rem;">
-                        Paste Logs
-                    </button>
-                </div>
-            </div>
-
-            <div id="uploadSection" class="form-group">
-                <label>Log File</label>
-                <input type="file" id="logFile" accept=".log,.txt">
-            </div>
-
-            <div id="pasteSection" class="form-group hidden">
-                <label>Paste Log Content</label>
-                <textarea id="logText" rows="10" placeholder="Paste your log content here — any format supported..." 
-                    style="width:100%; padding:10px 14px; background:#0d1117; border:1px solid #30363d; 
-                    border-radius:6px; color:#e6edf3; font-size:0.875rem; font-family:monospace; 
-                    resize:vertical;"></textarea>
-            </div>
-
-            <div class="form-group">
-                <label>GitHub Repository <span style="color:#8b949e; font-weight:400;">(optional — enables exact line-level diagnosis)</span></label>
-                <input type="text" id="repo" placeholder="owner/your-repo/">
-            </div>
-
-            <button id="analyzeBtn" onclick="analyze()">Analyze</button>
+<!-- ── SIDEBAR ── -->
+<aside class="sidebar">
+    <a href="/home" class="sidebar-brand">
+        <svg class="brand-icon" viewBox="0 0 32 32" fill="none">
+            <rect x="1" y="1" width="30" height="30" rx="7" stroke="#3B82F6" stroke-width="2.5" fill="none"/>
+            <circle cx="10" cy="16" r="2.5" fill="#3B82F6"/>
+            <path d="M15 11.5L21.5 16L15 20.5" stroke="#3B82F6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="brand-text">
+            <span class="brand-name">Roota</span>
+            <span class="brand-sub">Engineering Ops</span>
         </div>
+    </a>
 
-        <div id="loading" class="loading hidden">
-            Analyzing logs and fetching source code...
+    <nav class="sidebar-nav">
+        <button class="nav-item active" onclick="switchView('overview')">
+            <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.5"/><rect x="9" y="1" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.5"/><rect x="1" y="9" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.5"/><rect x="9" y="9" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.5"/></svg>
+            Overview
+        </button>
+        <button class="nav-item" onclick="switchView('incidents')">
+            <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 5v3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="11" r="0.75" fill="currentColor"/></svg>
+            Incidents
+        </button>
+        <button class="nav-item" onclick="switchView('logs')">
+            <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M2 8h8M2 12h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            Logs
+        </button>
+        <button class="nav-item" onclick="switchView('integrate')">
+            <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M6 3L3 8l3 5M10 3l3 5-3 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Infrastructure
+        </button>
+    </nav>
+
+    <button class="new-analysis-btn" onclick="switchView('overview'); focusAnalyze();">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v12M1 7h12" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
+        New Analysis
+    </button>
+
+    <div class="sidebar-bottom">
+        <button class="nav-item" onclick="switchView('profile')">
+            <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5.5" r="2.5" stroke="currentColor" stroke-width="1.5"/><path d="M3 13c0-2.761 2.239-5 5-5s5 2.239 5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            Profile
+        </button>
+        <button class="nav-item" onclick="logout()">
+            <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M6 2H3a1 1 0 00-1 1v10a1 1 0 001 1h3M10 11l3-3-3-3M13 8H6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Log Out
+        </button>
+    </div>
+</aside>
+
+<!-- ── MAIN ── -->
+<main class="main">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+        <div class="topbar-left">
+            <h1 id="viewTitle">Overview</h1>
+            <p id="viewSubtitle">Real-time system diagnostics and log analysis.</p>
         </div>
-
-        <div id="results" class="hidden">
-            <div class="stats">
-                <div class="stat">
-                    <div class="number" id="totalLines">0</div>
-                    <div class="label">Lines Parsed</div>
-                </div>
-                <div class="stat errors">
-                    <div class="number" id="errorCount">0</div>
-                    <div class="label">Errors</div>
-                </div>
-                <div class="stat warnings">
-                    <div class="number" id="warningCount">0</div>
-                    <div class="label">Warnings</div>
-                </div>
+        <div class="topbar-right">
+            <div class="env-badge">
+                <div class="env-dot"></div>
+                <span id="envLabel">Active</span>
             </div>
-
-            <div class="card" id="errorsCard">
-                <h2>Errors Detected</h2>
-                <table class="error-table">
-                    <thead>
-                        <tr>
-                            <th>Time</th>
-                            <th>Service</th>
-                            <th>Message</th>
-                        </tr>
-                    </thead>
-                    <tbody id="errorsBody"></tbody>
-                </table>
-            </div>
-
-            <div class="diagnosis">
-                <h2>AI Diagnosis</h2>
-                <pre id="diagnosisText"></pre>
-            </div>
+            <div class="icon-btn" onclick="loadIncidents()" title="Refresh">↻</div>
+            <div class="user-avatar" id="userAvatar" onclick="switchView('profile')">?</div>
         </div>
-        <div style="margin-top:40px;">
-            <h2 style="color:#8b949e; font-size:1rem; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:16px;">Integrate</h2>
-            
-            <div style="display:flex; gap:12px; margin-bottom:16px;">
-                <button class="sdk-tab active" id="sdkPython" onclick="switchSdk('python')"
-                    style="width:auto; padding:8px 20px; background:#238636; border:none; border-radius:6px; color:white; font-size:0.875rem; cursor:pointer;">
-                    Python
-                </button>
-                <button class="sdk-tab" id="sdkCpp" onclick="switchSdk('cpp')"
-                    style="width:auto; padding:8px 20px; background:#21262d; border:none; border-radius:6px; color:white; font-size:0.875rem; cursor:pointer;">
-                    C++
-                </button>
-            </div>
+    </div>
 
-            <div id="sdkPythonSection" class="card">
-                <h2>Python Auto-Capture</h2>
-                <p style="color:#8b949e; font-size:0.875rem; margin-bottom:16px;">
-                    Add two lines to your Python app. Every unhandled exception gets automatically captured, analyzed, and stored.
-                </p>
+    <!-- ── OVERVIEW VIEW ── -->
+    <div class="view active" id="view-overview">
+        <div class="overview-grid">
 
-                <p style="color:#8b949e; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:8px;">1. Copy debugai_sdk.py into your project</p>
-                <div style="background:#0d1117; border:1px solid #30363d; border-radius:6px; padding:16px; margin-bottom:16px; position:relative;">
-                    <pre style="color:#e6edf3; font-family:monospace; font-size:0.875rem; margin:0;">cp debugai_sdk.py /your/project/</pre>
+            <!-- LEFT COLUMN -->
+            <div style="display:flex; flex-direction:column; gap:16px;">
+
+                <!-- ANALYZE CARD -->
+                <div class="card">
+                    <div class="analyze-tabs">
+                        <button class="analyze-tab active" onclick="switchAnalyzeTab('paste')">Raw Text</button>
+                        <button class="analyze-tab" onclick="switchAnalyzeTab('upload')">Upload File</button>
+                    </div>
+                    <div class="analyze-body">
+                        <div class="repo-row">
+                            <span class="repo-label">Repo:</span>
+                            <input type="text" class="repo-input" id="repoInput" placeholder="owner/repo-name (optional)">
+                        </div>
+
+                        <div id="pasteArea">
+                            <textarea class="log-textarea" id="logTextarea" placeholder="// Paste your system logs here for AI-powered analysis..."></textarea>
+                        </div>
+
+                        <div id="uploadArea" style="display:none;">
+                            <div class="log-file-drop" id="dropZone">
+                                <input type="file" id="fileInput" accept=".log,.txt">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 15V3M12 3L8 7M12 3L16 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 17v1a3 3 0 003 3h12a3 3 0 003-3v-1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                                <span id="dropText">Drop log file here or click to browse</span>
+                            </div>
+                        </div>
+
+                        <div class="analyze-actions">
+                            <button class="btn-analyze" id="analyzeBtn" onclick="analyze()">Analyze</button>
+                        </div>
+                    </div>
                 </div>
 
-                <p style="color:#8b949e; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:8px;">2. Add to your app</p>
-                <div style="background:#0d1117; border:1px solid #30363d; border-radius:6px; padding:16px; margin-bottom:16px; position:relative;">
-                    <pre id="pythonCode" style="color:#e6edf3; font-family:monospace; font-size:0.875rem; margin:0;">import debugai_sdk
+                <!-- RESULT CARD -->
+                <div class="card result-card" id="resultCard">
+                    <div class="card-header">
+                        <span class="card-title">AI Diagnosis</span>
+                        <span id="resultIncidentId" style="font-size:0.75rem; color:var(--muted); font-family:'JetBrains Mono',monospace;"></span>
+                    </div>
+                    <div class="result-body">
+                        <div class="result-stats">
+                            <div class="stat-box">
+                                <div class="num" id="statLines" style="color:var(--blue);">—</div>
+                                <div class="lbl">Lines</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="num" id="statErrors" style="color:var(--red);">—</div>
+                                <div class="lbl">Errors</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="num" id="statWarnings" style="color:var(--amber);">—</div>
+                                <div class="lbl">Warnings</div>
+                            </div>
+                        </div>
+                        <div class="diagnosis-text" id="diagnosisText"></div>
+                    </div>
+                </div>
+
+                <!-- SDK CARD -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">SDK Implementation</span>
+                        <div class="sdk-tabs">
+                            <button class="sdk-tab active" onclick="switchSdk('cpp')">C++</button>
+                            <button class="sdk-tab" onclick="switchSdk('python')">Python</button>
+                            <button class="sdk-tab" onclick="switchSdk('js')">JS</button>
+                        </div>
+                    </div>
+                    <div class="sdk-body">
+                        <div id="sdk-cpp" class="code-block">
+                            <button class="copy-code-btn" onclick="copyCode('sdk-cpp')" title="Copy">⧉</button>
+                            <pre><span style="color:#93c5fd">#include</span> <span style="color:#6ee7b7">"debugai_handler.h"</span>
+
+<span style="color:#93c5fd">int</span> main() {
+    debugai::install_crash_handler(<span style="color:#6ee7b7">"logs/"</span>);
+    <span style="color:#6B7280">// ... your application code</span>
+    <span style="color:#93c5fd">return</span> <span style="color:#fcd34d">0</span>;
+}</pre>
+                        </div>
+                        <div id="sdk-python" class="code-block" style="display:none;">
+                            <button class="copy-code-btn" onclick="copyCode('sdk-python')" title="Copy">⧉</button>
+                            <pre><span style="color:#93c5fd">import</span> debugai_sdk
 
 debugai_sdk.install(
-    repo="owner/your-repo",
-    server="http://127.0.0.1:8000"
+    repo=<span style="color:#6ee7b7">"owner/your-repo"</span>,
+    server=<span style="color:#6ee7b7">"http://your-roota-server"</span>
 )</pre>
-                    <button onclick="copyCode('pythonCode')" 
-                        style="position:absolute; top:8px; right:8px; width:auto; padding:4px 12px; background:#21262d; border:1px solid #30363d; border-radius:4px; color:#8b949e; font-size:0.75rem; cursor:pointer;">
-                        Copy
-                    </button>
-                </div>
+                        </div>
+                        <div id="sdk-js" class="code-block" style="display:none;">
+                            <button class="copy-code-btn" onclick="copyCode('sdk-js')" title="Copy">⧉</button>
+                            <pre><span style="color:#6B7280">// Coming soon — Node.js SDK</span>
+<span style="color:#93c5fd">const</span> roota = <span style="color:#93c5fd">require</span>(<span style="color:#6ee7b7">'@roota/sdk'</span>);
 
-                <div style="background:#1a3a2a; border:1px solid #238636; border-radius:6px; padding:12px;">
-                    <p style="color:#3fb950; font-size:0.875rem; margin:0;">
-                        ✓ Works with any Python app — Django, Flask, FastAPI, scripts, services
-                    </p>
+roota.install({
+    repo: <span style="color:#6ee7b7">'owner/your-repo'</span>,
+    server: <span style="color:#6ee7b7">'http://your-roota-server'</span>
+});</pre>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div id="sdkCppSection" class="card hidden">
-                <h2>C++ Crash Handler</h2>
-                <p style="color:#8b949e; font-size:0.875rem; margin-bottom:16px;">
-                    Header-only, binary-agnostic crash handler. Automatically captures crash address, memory map, and signal — no debugger required.
-                </p>
+            <!-- RIGHT COLUMN -->
+            <div class="incidents-panel">
 
-                <p style="color:#8b949e; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:8px;">1. Copy header into your project</p>
-                <div style="background:#0d1117; border:1px solid #30363d; border-radius:6px; padding:16px; margin-bottom:16px;">
-                    <pre style="color:#e6edf3; font-family:monospace; font-size:0.875rem; margin:0;">cp cpp_integration/debugai_handler.h /your/project/</pre>
+                <!-- RECENT INCIDENTS -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Recent Incidents</span>
+                        <a href="#" onclick="switchView('incidents'); return false;" style="font-size:0.78rem; color:var(--blue); text-decoration:none;">View All</a>
+                    </div>
+                    <div class="incidents-list" id="recentIncidentsList">
+                        <div class="empty-state">
+                            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" style="margin:0 auto 8px;display:block;opacity:0.3"><circle cx="16" cy="16" r="14" stroke="#6B7280" stroke-width="2"/><path d="M16 10v6" stroke="#6B7280" stroke-width="2" stroke-linecap="round"/><circle cx="16" cy="20" r="1" fill="#6B7280"/></svg>
+                            <p>No incidents yet. Run your first analysis.</p>
+                        </div>
+                    </div>
                 </div>
 
-                <p style="color:#8b949e; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:8px;">2. Add to your main.cpp</p>
-                <div style="background:#0d1117; border:1px solid #30363d; border-radius:6px; padding:16px; margin-bottom:16px; position:relative;">
-                    <pre id="cppCode" style="color:#e6edf3; font-family:monospace; font-size:0.875rem; margin:0;">#include "debugai_handler.h"
+                <!-- THROUGHPUT CHART -->
+                <div class="card">
+                    <div class="chart-label">System Throughput</div>
+                    <div class="chart-bars" id="chartBars"></div>
+                    <div class="chart-labels">
+                        <span>00:00</span>
+                        <span>12:00</span>
+                        <span>Now</span>
+                    </div>
+                </div>
 
-int main() {
-    debugai::install_crash_handler("logs/");
-    
-    // ... rest of your code
+            </div>
+        </div>
+    </div>
+
+    <!-- ── INCIDENTS VIEW ── -->
+    <div class="view" id="view-incidents">
+        <div class="incidents-view-header">
+            <div>
+                <div style="font-size:0.78rem; color:var(--muted); margin-bottom:4px;">All incidents stored for your account</div>
+            </div>
+            <div class="filter-row">
+                <button class="filter-btn active" onclick="filterIncidents('all', this)">All</button>
+                <button class="filter-btn" onclick="filterIncidents('error', this)">Errors</button>
+                <button class="filter-btn" onclick="filterIncidents('warning', this)">Warnings</button>
+            </div>
+        </div>
+
+        <div class="incidents-table">
+            <div class="table-header">
+                <div>Severity</div>
+                <div>Summary</div>
+                <div>Repository</div>
+                <div>Time</div>
+                <div>Feedback</div>
+            </div>
+            <div id="incidentsTableBody">
+                <div class="empty-state"><p>No incidents found.</p></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── LOGS VIEW ── -->
+    <div class="view" id="view-logs">
+        <div class="card" style="max-width:800px;">
+            <div class="card-header">
+                <span class="card-title">Log Stream</span>
+                <span style="font-size:0.72rem; color:var(--muted);">Coming soon — real-time log ingestion</span>
+            </div>
+            <div style="padding:48px; text-align:center; color:var(--muted);">
+                <svg width="48" height="48" viewBox="0 0 48 48" fill="none" style="margin:0 auto 16px;display:block;opacity:0.3"><path d="M4 12h40M4 24h28M4 36h34" stroke="#6B7280" stroke-width="3" stroke-linecap="round"/></svg>
+                <p style="font-size:0.875rem;">Real-time log streaming via SDK is in development.</p>
+                <p style="font-size:0.78rem; margin-top:6px;">Connect your Python or C++ app using the SDK to stream logs automatically.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── INFRASTRUCTURE VIEW ── -->
+    <div class="view" id="view-integrate">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; max-width:900px;">
+            <div class="card">
+                <div class="card-header"><span class="card-title">Python SDK</span></div>
+                <div class="sdk-body" style="padding:20px;">
+                    <p style="font-size:0.82rem; color:var(--muted); margin-bottom:14px;">Add two lines to your Python app. Every unhandled exception gets captured automatically.</p>
+                    <div class="code-block">
+                        <pre><span style="color:#93c5fd">import</span> debugai_sdk
+
+debugai_sdk.install(
+    repo=<span style="color:#6ee7b7">"owner/repo"</span>,
+    server=<span style="color:#6ee7b7">"http://your-server"</span>
+)</pre>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header"><span class="card-title">C++ Handler</span></div>
+                <div class="sdk-body" style="padding:20px;">
+                    <p style="font-size:0.82rem; color:var(--muted); margin-bottom:14px;">Header-only crash handler. Drop it into any C++ project.</p>
+                    <div class="code-block">
+                        <pre><span style="color:#93c5fd">#include</span> <span style="color:#6ee7b7">"debugai_handler.h"</span>
+
+<span style="color:#93c5fd">int</span> main() {
+    debugai::install_crash_handler(<span style="color:#6ee7b7">"logs/"</span>);
+    <span style="color:#6B7280">// your code here</span>
 }</pre>
-                    <button onclick="copyCode('cppCode')"
-                        style="position:absolute; top:8px; right:8px; width:auto; padding:4px 12px; background:#21262d; border:1px solid #30363d; border-radius:4px; color:#8b949e; font-size:0.75rem; cursor:pointer;">
-                        Copy
-                    </button>
+                    </div>
                 </div>
-
-                <p style="color:#8b949e; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:8px;">3. Compile with debug symbols</p>
-                <div style="background:#0d1117; border:1px solid #30363d; border-radius:6px; padding:16px; margin-bottom:16px;">
-                    <pre style="color:#e6edf3; font-family:monospace; font-size:0.875rem; margin:0;">g++ -g your_app.cpp -o your_app</pre>
+            </div>
+            <div class="card" style="opacity:0.6;">
+                <div class="card-header">
+                    <span class="card-title">Sentry Webhook</span>
+                    <span style="font-size:0.68rem; background:rgba(245,158,11,0.1); color:#fcd34d; border:1px solid rgba(245,158,11,0.3); padding:2px 7px; border-radius:4px;">Coming Soon</span>
                 </div>
-
-                <p style="color:#8b949e; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:8px;">4. Analyze the crash report</p>
-                <div style="background:#0d1117; border:1px solid #30363d; border-radius:6px; padding:16px; margin-bottom:16px;">
-                    <pre style="color:#e6edf3; font-family:monospace; font-size:0.875rem; margin:0;">python debugai.py --log service.log \
-    --repo owner/repo \
-    --crash-report logs/crash_report_*.log</pre>
+                <div style="padding:20px;">
+                    <p style="font-size:0.82rem; color:var(--muted);">Auto-analyze every Sentry error the moment it fires. No manual steps.</p>
                 </div>
-
-                <div style="background:#1a3a2a; border:1px solid #238636; border-radius:6px; padding:12px;">
-                    <p style="color:#3fb950; font-size:0.875rem; margin:0;">
-                        ✓ Header-only — no dependencies, no build system changes required
-                    </p>
+            </div>
+            <div class="card" style="opacity:0.6;">
+                <div class="card-header">
+                    <span class="card-title">Slack Bot</span>
+                    <span style="font-size:0.68rem; background:rgba(245,158,11,0.1); color:#fcd34d; border:1px solid rgba(245,158,11,0.3); padding:2px 7px; border-radius:4px;">Coming Soon</span>
+                </div>
+                <div style="padding:20px;">
+                    <p style="font-size:0.82rem; color:var(--muted);">Post AI diagnoses directly to your #incidents channel automatically.</p>
                 </div>
             </div>
         </div>
     </div>
-    <div style="margin-top:40px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-                <h2 style="color:#8b949e; font-size:1rem; text-transform:uppercase; letter-spacing:0.05em;">Past Incidents</h2>
-                <button onclick="loadHistory()" style="width:auto; padding:8px 16px; background:#21262d; font-size:0.875rem;">Refresh</button>
-            </div>
-            <div id="historyList"></div>
-        </div>
 
-   <script>
-        let currentApiKey = localStorage.getItem('roota_api_key') || null;
-        let currentEmail = localStorage.getItem('roota_email') || null;
-        if (!currentApiKey) {
+    <!-- ── PROFILE VIEW ── -->
+    <div class="view" id="view-profile">
+        <div class="profile-grid">
+
+            <!-- PROFILE INFO CARD -->
+            <div class="card profile-card">
+                <div class="card-title" style="margin-bottom:20px;">Profile Information</div>
+
+                <div class="profile-avatar-section">
+                    <div class="profile-avatar-large" id="profileAvatarLarge">?</div>
+                    <div class="profile-info">
+                        <h2 id="profileName">—</h2>
+                        <p id="profileUsername">@—</p>
+                    </div>
+                </div>
+
+                <div class="profile-field">
+                    <div class="profile-label">Full Name</div>
+                    <input class="profile-value" id="profileNameInput" type="text" disabled>
+                </div>
+                <div class="profile-field">
+                    <div class="profile-label">Username</div>
+                    <input class="profile-value" id="profileUsernameInput" type="text" disabled>
+                </div>
+                <div class="profile-field">
+                    <div class="profile-label">Email Address</div>
+                    <input class="profile-value" id="profileEmailInput" type="email" disabled>
+                </div>
+                <div class="profile-field">
+                    <div class="profile-label">API Key</div>
+                    <input class="profile-value profile-api-key" id="profileApiKey" type="text" disabled>
+                </div>
+            </div>
+
+            <!-- CHANGE PASSWORD CARD -->
+            <div class="card profile-card">
+                <div class="card-title" style="margin-bottom:20px;">Change Password</div>
+
+                <div class="profile-field">
+                    <div class="profile-label">Current Password</div>
+                    <input class="profile-value" id="currentPassword" type="password" placeholder="Enter current password">
+                </div>
+                <div class="profile-field">
+                    <div class="profile-label">New Password</div>
+                    <input class="profile-value" id="newPassword" type="password" placeholder="Enter new password">
+                </div>
+                <div class="profile-field">
+                    <div class="profile-label">Confirm New Password</div>
+                    <input class="profile-value" id="confirmPassword" type="password" placeholder="Confirm new password">
+                </div>
+
+                <button class="btn-save" onclick="changePassword()">Update Password</button>
+
+                <div class="success-msg" id="passwordSuccess">Password updated successfully.</div>
+                <div class="error-msg" id="passwordError"></div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="dashboard-footer">
+        <p>Roota v0.1.0 — Built for engineers who take production seriously.</p>
+        <div class="footer-links">
+            <a href="/docs-page">Docs</a>
+            <a href="/pricing">Pricing</a>
+            <a href="/home">Home</a>
+        </div>
+    </div>
+
+</main>
+
+<script>
+// ── AUTH CHECK ──
+const currentApiKey = localStorage.getItem('roota_api_key');
+const currentEmail = localStorage.getItem('roota_email');
+const currentUsername = localStorage.getItem('roota_username');
+
+if (!currentApiKey) window.location.href = '/login';
+
+// ── INIT UI ──
+function initUI() {
+    if (currentUsername) {
+        const initials = (currentUsername || '?').substring(0, 2).toUpperCase();
+        document.getElementById('userAvatar').textContent = initials;
+        document.getElementById('profileAvatarLarge').textContent = initials;
+        document.getElementById('profileName').textContent = currentUsername;
+        document.getElementById('profileUsername').textContent = '@' + currentUsername;
+        document.getElementById('profileUsernameInput').value = currentUsername;
+        document.getElementById('profileEmailInput').value = currentEmail || '';
+        document.getElementById('profileApiKey').value = currentApiKey ? currentApiKey.substring(0, 20) + '...' : '';
+        document.getElementById('profileNameInput').value = currentUsername;
+    }
+    generateChart();
+    loadIncidents();
+}
+
+// ── LOGOUT ──
+function logout() {
+    localStorage.removeItem('roota_api_key');
+    localStorage.removeItem('roota_email');
+    localStorage.removeItem('roota_username');
     window.location.href = '/login';
 }
-        let authMode = 'signup';
-        function switchTab(tab) {
-            if (tab === 'upload') {
-                document.getElementById('uploadSection').classList.remove('hidden');
-                document.getElementById('pasteSection').classList.add('hidden');
-                document.getElementById('tabUpload').style.background = '#238636';
-                document.getElementById('tabPaste').style.background = '#21262d';
-            } else {
-                document.getElementById('uploadSection').classList.add('hidden');
-                document.getElementById('pasteSection').classList.remove('hidden');
-                document.getElementById('tabUpload').style.background = '#21262d';
-                document.getElementById('tabPaste').style.background = '#238636';
-            }
+
+// ── VIEW SWITCHING ──
+const viewTitles = {
+    overview: ['Overview', 'Real-time system diagnostics and log analysis.'],
+    incidents: ['Incidents', 'All captured incidents for your account.'],
+    logs: ['Log Stream', 'Real-time log ingestion from your services.'],
+    integrate: ['Infrastructure', 'SDK setup and integration guides.'],
+    profile: ['Profile', 'Manage your account and security settings.']
+};
+
+function switchView(view) {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+    document.getElementById('view-' + view).classList.add('active');
+
+    const navItems = document.querySelectorAll('.nav-item');
+    navItems.forEach(item => {
+        if (item.getAttribute('onclick') && item.getAttribute('onclick').includes("'" + view + "'")) {
+            item.classList.add('active');
         }
+    });
 
-        async function analyze() {
-            const repo = document.getElementById('repo').value;
-            const btn = document.getElementById('analyzeBtn');
-            const isUpload = !document.getElementById('uploadSection').classList.contains('hidden');
+    const [title, sub] = viewTitles[view] || ['Dashboard', ''];
+    document.getElementById('viewTitle').textContent = title;
+    document.getElementById('viewSubtitle').textContent = sub;
 
-            let formData = new FormData();
+    if (view === 'incidents') loadIncidentsTable();
+}
 
-            if (isUpload) {
-                const logFile = document.getElementById('logFile').files[0];
-                if (!logFile) {
-                    alert('Please select a log file');
-                    return;
-                }
-                formData.append('log_file', logFile);
-            } else {
-                const logText = document.getElementById('logText').value.trim();
-                if (!logText) {
-                    alert('Please paste some log content');
-                    return;
-                }
-                const blob = new Blob([logText], { type: 'text/plain' });
-                formData.append('log_file', blob, 'pasted.log');
-            }
+function focusAnalyze() {
+    setTimeout(() => document.getElementById('logTextarea').focus(), 100);
+}
 
-            if (repo) formData.append('repo', repo);
+// ── ANALYZE TABS ──
+function switchAnalyzeTab(tab) {
+    document.querySelectorAll('.analyze-tab').forEach(t => t.classList.remove('active'));
+    event.target.classList.add('active');
+    document.getElementById('pasteArea').style.display = tab === 'paste' ? 'block' : 'none';
+    document.getElementById('uploadArea').style.display = tab === 'upload' ? 'block' : 'none';
+}
 
-            btn.disabled = true;
-            btn.textContent = 'Analyzing...';
-            document.getElementById('loading').classList.remove('hidden');
-            document.getElementById('results').classList.add('hidden');
+// ── FILE UPLOAD ──
+const fileInput = document.getElementById('fileInput');
+const dropText = document.getElementById('dropText');
 
-            try {
-                const headers = {};
-                if (currentApiKey) headers['X-API-Key'] = currentApiKey;
-
-                const response = await fetch('http://127.0.0.1:8000/analyze', {
-                    method: 'POST',
-                    headers: headers,
-                    body: formData
-                });
-
-                const data = await response.json();
-
-                document.getElementById('totalLines').textContent = data.stats.total_lines;
-                document.getElementById('errorCount').textContent = data.stats.errors;
-                document.getElementById('warningCount').textContent = data.stats.warnings;
-
-                const tbody = document.getElementById('errorsBody');
-                tbody.innerHTML = '';
-                data.errors.forEach(err => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${err.timestamp}</td>
-                        <td>${err.service}</td>
-                        <td class="badge-error">${err.message}</td>
-                    `;
-                    tbody.appendChild(row);
-                });
-
-                document.getElementById('diagnosisText').textContent = data.diagnosis;
-
-                document.getElementById('loading').classList.add('hidden');
-                document.getElementById('results').classList.remove('hidden');
-
-            } catch (error) {
-                alert('Error connecting to debugai server. Make sure it is running.');
-                console.error(error);
-            } finally {
-                btn.disabled = false;
-                btn.textContent = 'Analyze';
-            }
-        }
-    async function loadHistory() {
-            try {
-                const response = await fetch('http://127.0.0.1:8000/incidents', {
-    headers: currentApiKey ? {'X-API-Key': currentApiKey} : {}
+fileInput.addEventListener('change', () => {
+    if (fileInput.files[0]) {
+        dropText.textContent = '✓ ' + fileInput.files[0].name;
+    }
 });
-                const data = await response.json();
 
-                const container = document.getElementById('historyList');
+// ── ANALYZE ──
+async function analyze() {
+    const repo = document.getElementById('repoInput').value.trim();
+    const btn = document.getElementById('analyzeBtn');
+    const isPaste = document.getElementById('pasteArea').style.display !== 'none';
 
-                if (data.incidents.length === 0) {
-                    container.innerHTML = '<p style="color:#8b949e; text-align:center; padding:20px;">No incidents yet.</p>';
-                    return;
-                }
+    let formData = new FormData();
 
-                container.innerHTML = data.incidents.map(inc => `
-                    <div style="background:#161b22; border:1px solid #30363d; border-radius:8px; padding:16px; margin-bottom:12px;">
-                        <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
-                            <span style="color:#58a6ff; font-weight:600;">Incident #${inc.id}</span>
-                            <span style="color:#8b949e; font-size:0.875rem;">${inc.timestamp.split('T')[0]} ${inc.timestamp.split('T')[1].split('.')[0]}</span>
-                        </div>
-                        <div style="display:flex; gap:16px; margin-bottom:8px;">
-                            <span style="color:#f85149;">● ${inc.error_count} errors</span>
-                            <span style="color:#e3b341;">● ${inc.warning_count} warnings</span>
-                            ${inc.repo ? `<span style="color:#8b949e;">📦 ${inc.repo}</span>` : ''}
-                        </div>
-                        <div style="color:#8b949e; font-size:0.875rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-                        ${inc.diagnosis ? inc.diagnosis.split('\n').filter(line => line.trim() && !line.includes('INCIDENT SUMMARY:') && !line.startsWith('━'))[0] || 'No diagnosis' : 'No diagnosis'}
-                        </div>
-                        <div style="margin-top:12px; display:flex; gap:8px;">
-                            <button onclick="submitFeedback(${inc.id}, 'correct')" 
-                                style="width:auto; padding:4px 12px; background:#1a3a2a; border:1px solid #238636; border-radius:4px; color:#3fb950; font-size:0.8rem; cursor:pointer;">
-                                👍 Correct
-                            </button>
-                            <button onclick="submitFeedback(${inc.id}, 'incorrect')"
-                                style="width:auto; padding:4px 12px; background:#3a1a1a; border:1px solid #f85149; border-radius:4px; color:#f85149; font-size:0.8rem; cursor:pointer;">
-                                👎 Incorrect
-                            </button>
-                            ${inc.feedback ? `<span style="color:#8b949e; font-size:0.8rem; align-self:center;">Marked: ${inc.feedback}</span>` : ''}
-                        </div>
+    if (isPaste) {
+        const text = document.getElementById('logTextarea').value.trim();
+        if (!text) { alert('Please paste some log content.'); return; }
+        const blob = new Blob([text], { type: 'text/plain' });
+        formData.append('log_file', blob, 'pasted.log');
+    } else {
+        const file = fileInput.files[0];
+        if (!file) { alert('Please select a log file.'); return; }
+        formData.append('log_file', file);
+    }
+
+    if (repo) formData.append('repo', repo);
+
+    btn.disabled = true;
+    btn.textContent = 'Analyzing...';
+    showLoading('Analyzing your logs with AI...');
+
+    try {
+        const response = await fetch('http://127.0.0.1:8000/analyze', {
+            method: 'POST',
+            headers: { 'X-API-Key': currentApiKey },
+            body: formData
+        });
+
+        const data = await response.json();
+
+        document.getElementById('statLines').textContent = data.stats.total_lines;
+        document.getElementById('statErrors').textContent = data.stats.errors;
+        document.getElementById('statWarnings').textContent = data.stats.warnings;
+        document.getElementById('diagnosisText').textContent = data.diagnosis || 'No diagnosis returned.';
+        document.getElementById('resultIncidentId').textContent = '#' + data.incident_id;
+
+        const resultCard = document.getElementById('resultCard');
+        resultCard.style.display = 'block';
+        resultCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+        loadIncidents();
+
+    } catch (error) {
+        alert('Could not connect to Roota server. Make sure it is running.');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Analyze';
+        hideLoading();
+    }
+}
+
+// ── LOAD RECENT INCIDENTS (sidebar panel) ──
+async function loadIncidents() {
+    try {
+        const response = await fetch('http://127.0.0.1:8000/incidents', {
+            headers: { 'X-API-Key': currentApiKey }
+        });
+        const data = await response.json();
+        const list = document.getElementById('recentIncidentsList');
+
+        if (!data.incidents || data.incidents.length === 0) {
+            list.innerHTML = `<div class="empty-state"><p>No incidents yet. Run your first analysis.</p></div>`;
+            return;
+        }
+
+        const recent = data.incidents.slice(0, 3);
+        list.innerHTML = recent.map(inc => {
+            const severity = inc.error_count > 2 ? 'CRITICAL' : inc.error_count > 0 ? 'WARNING' : 'INFO';
+            const sevClass = severity === 'CRITICAL' ? 'sev-critical' : severity === 'WARNING' ? 'sev-warning' : 'sev-info';
+            const timeAgo = getTimeAgo(inc.timestamp);
+            const preview = inc.diagnosis ? inc.diagnosis.split('\n').filter(l => l.trim() && !l.includes('INCIDENT SUMMARY:') && !l.startsWith('━'))[0] || 'Analysis complete' : 'Analysis complete';
+
+            return `
+                <div class="incident-item">
+                    <div class="incident-top">
+                        <span class="severity-badge ${sevClass}">${severity}</span>
+                        <span class="incident-time">${timeAgo}</span>
                     </div>
+                    <div class="incident-msg">${preview.substring(0, 60)}${preview.length > 60 ? '...' : ''}</div>
+                    <div class="incident-actions">
+                        <button class="inc-btn" style="font-size:0.65rem; color:var(--muted2);">Resolved?</button>
+                        <button class="inc-btn correct" onclick="submitFeedback(${inc.id}, 'correct', this)">Correct</button>
+                        <button class="inc-btn incorrect" onclick="submitFeedback(${inc.id}, 'incorrect', this)">Incorrect</button>
+                    </div>
+                </div>`;
+        }).join('');
 
-                `).join('');
-
-            } catch (error) {
-                console.error('Could not load history:', error);
-            }
-        }
-    async function submitFeedback(incidentId, rating) {
-            try {
-                await fetch(`http://127.0.0.1:8000/incidents/${incidentId}/feedback?rating=${rating}`, {
-                    method: 'POST'
-                });
-                loadHistory();
-            } catch (error) {
-                console.error('Could not submit feedback:', error);
-            }
-        }
-    function switchSdk(sdk) {
-            if (sdk === 'python') {
-                document.getElementById('sdkPythonSection').classList.remove('hidden');
-                document.getElementById('sdkCppSection').classList.add('hidden');
-                document.getElementById('sdkPython').style.background = '#238636';
-                document.getElementById('sdkCpp').style.background = '#21262d';
-            } else {
-                document.getElementById('sdkPythonSection').classList.add('hidden');
-                document.getElementById('sdkCppSection').classList.remove('hidden');
-                document.getElementById('sdkPython').style.background = '#21262d';
-                document.getElementById('sdkCpp').style.background = '#238636';
-            }
-        }
-
-    function copyCode(elementId) {
-            const code = document.getElementById(elementId).textContent;
-            navigator.clipboard.writeText(code).then(() => {
-                const btn = event.target;
-                btn.textContent = 'Copied!';
-                btn.style.color = '#3fb950';
-                setTimeout(() => {
-                    btn.textContent = 'Copy';
-                    btn.style.color = '#8b949e';
-                }, 2000);
-            });
-        }
-
-
-        function showSignup() {
-            authMode = 'signup';
-            document.getElementById('signupTab').style.background = '#238636';
-            document.getElementById('loginTab').style.background = '#21262d';
-            document.getElementById('authSubmitBtn').textContent = 'Sign Up';
-            document.getElementById('authTitle').textContent = 'Sign Up';
-            document.getElementById('authError').style.display = 'none';
-        }
-
-        function showLogin() {
-            authMode = 'login';
-            document.getElementById('loginTab').style.background = '#238636';
-            document.getElementById('signupTab').style.background = '#21262d';
-            document.getElementById('authSubmitBtn').textContent = 'Log In';
-            document.getElementById('authTitle').textContent = 'Log In';
-            document.getElementById('authError').style.display = 'none';
-        }
-
-        async function submitAuth() {
-            const email = document.getElementById('authEmail').value.trim();
-            const password = document.getElementById('authPassword').value;
-            const errorEl = document.getElementById('authError');
-
-            if (!email || !password) {
-                errorEl.textContent = 'Please enter email and password';
-                errorEl.style.display = 'block';
-                return;
-            }
-
-            const formData = new FormData();
-            formData.append('email', email);
-            formData.append('password', password);
-
-            const endpoint = authMode === 'signup' ? '/register' : '/login';
-
-            try {
-                const response = await fetch(`http://127.0.0.1:8000${endpoint}`, {
-                    method: 'POST',
-                    body: formData
-                });
-                const data = await response.json();
-
-                if (data.error) {
-                    errorEl.textContent = data.error;
-                    errorEl.style.display = 'block';
-                    return;
-                }
-
-                currentApiKey = data.api_key;
-                currentEmail = data.email;
-                localStorage.setItem('debugai_api_key', currentApiKey);
-                localStorage.setItem('debugai_email', currentEmail);
-                updateAuthUI();
-
-            } catch (error) {
-                errorEl.textContent = 'Could not connect to server';
-                errorEl.style.display = 'block';
-            }
-        }
-
-        function logout() {
-        localStorage.removeItem('roota_api_key');
-        localStorage.removeItem('roota_email');
-        window.location.href = '/login';
-}
-if (currentEmail) {
-    document.getElementById('userEmail').textContent = currentEmail;
+    } catch (e) {
+        console.error('Could not load incidents:', e);
+    }
 }
 
-        function updateAuthUI() {
-            if (currentApiKey) {
-                document.getElementById('authSection').classList.add('hidden');
-                document.getElementById('userBar').classList.remove('hidden');
-                document.getElementById('apiKeyDisplay').textContent = currentEmail || '';
-                loadHistory();
-            } else {
-                document.getElementById('authSection').classList.remove('hidden');
-                document.getElementById('userBar').classList.add('hidden');
-            }
-        }
+// ── LOAD INCIDENTS TABLE ──
+let allIncidents = [];
 
-        updateAuthUI();
-    </script>
+async function loadIncidentsTable() {
+    try {
+        const response = await fetch('http://127.0.0.1:8000/incidents', {
+            headers: { 'X-API-Key': currentApiKey }
+        });
+        const data = await response.json();
+        allIncidents = data.incidents || [];
+        renderIncidentsTable(allIncidents);
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+function renderIncidentsTable(incidents) {
+    const body = document.getElementById('incidentsTableBody');
+    if (incidents.length === 0) {
+        body.innerHTML = `<div class="empty-state"><p>No incidents found.</p></div>`;
+        return;
+    }
+
+    body.innerHTML = incidents.map(inc => {
+        const severity = inc.error_count > 2 ? 'CRITICAL' : inc.error_count > 0 ? 'WARNING' : 'INFO';
+        const sevClass = severity === 'CRITICAL' ? 'sev-critical' : severity === 'WARNING' ? 'sev-warning' : 'sev-info';
+        const preview = inc.diagnosis ? inc.diagnosis.split('\n').filter(l => l.trim() && !l.includes('INCIDENT SUMMARY:') && !l.startsWith('━'))[0] || '—' : '—';
+        const timeAgo = getTimeAgo(inc.timestamp);
+        const feedback = inc.feedback ? `<span style="font-size:0.7rem; color:${inc.feedback === 'correct' ? '#6ee7b7' : '#fca5a5'}">✓ ${inc.feedback}</span>` : '—';
+
+        return `<div class="table-row">
+            <div class="cell"><span class="severity-badge ${sevClass}">${severity}</span></div>
+            <div class="cell primary">${preview.substring(0, 60)}${preview.length > 60 ? '...' : ''}</div>
+            <div class="cell">${inc.repo || '—'}</div>
+            <div class="cell">${timeAgo}</div>
+            <div class="cell">${feedback}</div>
+        </div>`;
+    }).join('');
+}
+
+function filterIncidents(type, btn) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    if (type === 'all') renderIncidentsTable(allIncidents);
+    else if (type === 'error') renderIncidentsTable(allIncidents.filter(i => i.error_count > 0));
+    else if (type === 'warning') renderIncidentsTable(allIncidents.filter(i => i.warning_count > 0 && i.error_count === 0));
+}
+
+// ── FEEDBACK ──
+async function submitFeedback(incidentId, rating, btn) {
+    try {
+        await fetch(`http://127.0.0.1:8000/incidents/${incidentId}/feedback?rating=${rating}`, {
+            method: 'POST',
+            headers: { 'X-API-Key': currentApiKey }
+        });
+        btn.classList.add(rating === 'correct' ? 'marked-correct' : 'marked-incorrect');
+        btn.textContent = rating === 'correct' ? '✓ Correct' : '✗ Incorrect';
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+// ── SDK TABS ──
+function switchSdk(lang) {
+    ['cpp', 'python', 'js'].forEach(l => {
+        document.getElementById('sdk-' + l).style.display = l === lang ? 'block' : 'none';
+    });
+    document.querySelectorAll('.sdk-tab').forEach((t, i) => {
+        t.classList.toggle('active', ['cpp', 'python', 'js'][i] === lang);
+    });
+}
+
+// ── COPY CODE ──
+function copyCode(blockId) {
+    const text = document.getElementById(blockId).querySelector('pre').textContent;
+    navigator.clipboard.writeText(text);
+    event.target.textContent = '✓';
+    setTimeout(() => { event.target.textContent = '⧉'; }, 1500);
+}
+
+// ── CHANGE PASSWORD ──
+async function changePassword() {
+    const current = document.getElementById('currentPassword').value;
+    const newPass = document.getElementById('newPassword').value;
+    const confirm = document.getElementById('confirmPassword').value;
+    const successEl = document.getElementById('passwordSuccess');
+    const errorEl = document.getElementById('passwordError');
+
+    successEl.style.display = 'none';
+    errorEl.style.display = 'none';
+
+    if (!current || !newPass || !confirm) {
+        errorEl.textContent = 'Please fill in all fields.';
+        errorEl.style.display = 'block';
+        return;
+    }
+
+    if (newPass !== confirm) {
+        errorEl.textContent = 'New passwords do not match.';
+        errorEl.style.display = 'block';
+        return;
+    }
+
+    if (newPass.length < 6) {
+        errorEl.textContent = 'New password must be at least 6 characters.';
+        errorEl.style.display = 'block';
+        return;
+    }
+
+    try {
+        const formData = new FormData();
+        formData.append('current_password', current);
+        formData.append('new_password', newPass);
+
+        const response = await fetch('http://127.0.0.1:8000/change-password', {
+            method: 'POST',
+            headers: { 'X-API-Key': currentApiKey },
+            body: formData
+        });
+
+        const data = await response.json();
+
+        if (data.error) {
+            errorEl.textContent = data.error;
+            errorEl.style.display = 'block';
+        } else {
+            successEl.style.display = 'block';
+            document.getElementById('currentPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmPassword').value = '';
+        }
+    } catch (e) {
+        errorEl.textContent = 'Could not connect to server.';
+        errorEl.style.display = 'block';
+    }
+}
+
+// ── CHART ──
+function generateChart() {
+    const bars = document.getElementById('chartBars');
+    const heights = [20, 35, 45, 30, 55, 40, 65, 50, 70, 45, 60, 80, 55, 75, 90, 65, 85, 70, 95, 80, 70, 85, 75, 90];
+    bars.innerHTML = heights.map((h, i) =>
+        `<div class="chart-bar ${i === heights.length - 1 ? 'highlight' : ''}" style="height:${h}%"></div>`
+    ).join('');
+}
+
+// ── LOADING ──
+function showLoading(text) {
+    document.getElementById('loadingText').textContent = text || 'Loading...';
+    document.getElementById('loadingOverlay').classList.add('show');
+}
+
+function hideLoading() {
+    document.getElementById('loadingOverlay').classList.remove('show');
+}
+
+// ── TIME AGO ──
+function getTimeAgo(timestamp) {
+    const now = new Date();
+    const then = new Date(timestamp);
+    const diff = Math.floor((now - then) / 1000);
+    if (diff < 60) return diff + 's ago';
+    if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+    if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+    return Math.floor(diff / 86400) + 'd ago';
+}
+
+// ── INIT ──
+initUI();
+</script>
 </body>
 </html>

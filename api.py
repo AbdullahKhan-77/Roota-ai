@@ -11,6 +11,9 @@ from ai import analyze_logs
 from github import fetch_file_from_github, get_repo_file_tree, find_full_path, find_file_by_function, get_default_branch
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, RedirectResponse
+import sqlite3
+import bcrypt
+from database import DB_PATH
 
 
 app = FastAPI(title="Roota API", version="0.1.0")
@@ -197,27 +200,61 @@ async def ingest(data: dict):
         return {"status": "error", "message": str(e)}
     
 @app.post("/register")
-def register(email: str = Form(...), password: str = Form(...)):
-    user = create_user(email, password)
-    if not user:
-        return {"error": "Email already registered"}
+def register(
+    name: str = Form(...),
+    username: str = Form(...),
+    email: str = Form(...),
+    password: str = Form(...)
+):
+    result = create_user(name, username, email, password)
+    if result.get("error"):
+        return {"error": result["error"]}
     return {
         "status": "success",
-        "email": user["email"],
-        "api_key": user["api_key"]
+        "email": result["email"],
+        "username": result["username"],
+        "api_key": result["api_key"]
     }
 
 @app.post("/login")
-def login(email: str = Form(...), password: str = Form(...)):
-    user = verify_user(email, password)
+def login(login: str = Form(...), password: str = Form(...)):
+    user = verify_user(login, password)
     if not user:
-        return {"error": "Invalid email or password"}
+        return {"error": "Invalid username/email or password"}
     return {
         "status": "success",
         "email": user["email"],
+        "username": user["username"],
         "api_key": user["api_key"]
     }
     
 @app.get("/docs-page")
 def serve_docs():
     return FileResponse("docs.html")
+
+@app.get("/pricing")
+def serve_pricing():
+    return FileResponse("pricing.html")
+
+@app.post("/change-password")
+def change_password(
+    current_password: str = Form(...),
+    new_password: str = Form(...),
+    x_api_key: Optional[str] = Header(None)
+):
+    if not x_api_key:
+        return {"error": "Authentication required"}
+    user = get_user_by_api_key(x_api_key)
+    if not user:
+        return {"error": "Invalid API key"}
+    
+    if not bcrypt.checkpw(current_password.encode('utf-8'), user['password_hash'].encode('utf-8')):
+        return {"error": "Current password is incorrect"}
+    
+    new_hash = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute('UPDATE users SET password_hash = ? WHERE id = ?', (new_hash, user['id']))
+    conn.commit()
+    conn.close()
+    return {"status": "success"}

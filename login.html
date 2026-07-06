@@ -4,250 +4,683 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Roota — Sign In</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' fill='none'%3E%3Crect x='1' y='1' width='30' height='30' rx='7' stroke='%233B82F6' stroke-width='2.5' fill='%23090909'/%3E%3Ccircle cx='10' cy='16' r='2.5' fill='%233B82F6'/%3E%3Cpath d='M15 11.5L21.5 16L15 20.5' stroke='%233B82F6' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
-        body {
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            background: #0a0a0f;
-            color: #e6edf3;
+        :root {
+            --bg: #09090B;
+            --surface: #0F1117;
+            --surface2: #1a1a2e;
+            --border: #27272A;
+            --blue: #3B82F6;
+            --blue-dim: #3B82F615;
+            --text: #F9FAFB;
+            --muted: #9CA3AF;
+            --muted2: #52525B;
+        }
+
+        html, body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* SHADER */
+        #shader-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* BACK LINK */
+        .back-link {
+            position: fixed;
+            top: 24px;
+            left: 48px;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover { color: var(--text); }
+
+        /* PAGE LAYOUT */
+        .page {
+            position: relative;
+            z-index: 1;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 80px 20px;
         }
 
-        .auth-container {
+        /* AUTH CARD */
+        .auth-card {
             width: 100%;
-            max-width: 420px;
-            padding: 20px;
+            max-width: 440px;
+            background: rgba(15, 17, 23, 0.85);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 40px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 0 60px rgba(59, 130, 246, 0.05);
         }
 
-        .logo {
+        /* LOGO */
+        .card-logo {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+
+        /* HEADING */
+        .card-heading {
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 28px;
         }
 
-        .logo h1 {
-            font-size: 2.5rem;
+        .card-heading h1 {
+            font-size: 1.6rem;
             font-weight: 800;
-            background: linear-gradient(135deg, #6366f1, #8b5cf6);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            letter-spacing: -0.05em;
+            letter-spacing: -0.02em;
+            margin-bottom: 6px;
         }
 
-        .logo p {
-            color: #6b7280;
+        .card-heading p {
             font-size: 0.875rem;
-            margin-top: 6px;
+            color: var(--muted);
         }
 
-        .card {
-            background: #111118;
-            border: 1px solid #1f1f2e;
-            border-radius: 12px;
-            padding: 32px;
-        }
-
+        /* TABS */
         .tabs {
             display: flex;
-            background: #0a0a0f;
-            border-radius: 8px;
-            padding: 4px;
+            border-bottom: 1px solid var(--border);
             margin-bottom: 28px;
         }
 
         .tab {
             flex: 1;
-            padding: 8px;
+            padding: 10px;
             text-align: center;
-            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--muted);
             cursor: pointer;
-            font-size: 0.875rem;
-            font-weight: 500;
-            color: #6b7280;
-            transition: all 0.2s;
             border: none;
             background: transparent;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1px;
+            transition: all 0.2s;
+            font-family: 'Space Grotesk', sans-serif;
         }
 
         .tab.active {
-            background: #1f1f2e;
-            color: #e6edf3;
+            color: var(--blue);
+            border-bottom-color: var(--blue);
         }
 
-        .form-group {
+        /* SOCIAL BUTTONS */
+        .social-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
             margin-bottom: 20px;
         }
 
-        label {
-            display: block;
-            font-size: 0.8rem;
-            color: #6b7280;
-            margin-bottom: 8px;
+        .social-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--muted);
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: not-allowed;
+            opacity: 0.5;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        /* DIVIDER */
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .divider-line {
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .divider span {
+            font-size: 0.72rem;
+            color: var(--muted2);
             text-transform: uppercase;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.1em;
+            white-space: nowrap;
+        }
+
+        /* FORM */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            color: var(--muted);
+            margin-bottom: 7px;
+        }
+
+        .forgot-link {
+            color: var(--blue);
+            text-decoration: none;
+            font-size: 0.78rem;
+            transition: opacity 0.2s;
+        }
+
+        .forgot-link:hover { opacity: 0.7; }
+
+        .input-wrap {
+            position: relative;
         }
 
         input {
             width: 100%;
-            padding: 12px 16px;
-            background: #0a0a0f;
-            border: 1px solid #1f1f2e;
+            padding: 11px 14px;
+            background: rgba(9, 9, 11, 0.8);
+            border: 1px solid var(--border);
             border-radius: 8px;
-            color: #e6edf3;
+            color: var(--text);
             font-size: 0.875rem;
+            font-family: 'Space Grotesk', sans-serif;
             transition: border-color 0.2s;
             outline: none;
         }
 
-        input:focus {
-            border-color: #6366f1;
+        input:focus { border-color: var(--blue); }
+        input::placeholder { color: var(--muted2); }
+
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--muted2);
+            cursor: pointer;
+            padding: 4px;
+            font-size: 1rem;
+            line-height: 1;
         }
 
+        /* SUBMIT */
         .submit-btn {
             width: 100%;
             padding: 12px;
-            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            background: var(--blue);
             border: none;
             border-radius: 8px;
             color: white;
             font-size: 0.9rem;
             font-weight: 600;
             cursor: pointer;
-            transition: opacity 0.2s;
-            margin-top: 8px;
+            transition: all 0.2s;
+            font-family: 'Space Grotesk', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 4px;
         }
 
-        .submit-btn:hover { opacity: 0.9; }
-        .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .submit-btn:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px -8px rgba(59,130,246,0.5);
+        }
 
-        .error {
-            background: #1a0a0a;
-            border: 1px solid #7f1d1d;
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* ERROR */
+        .error-msg {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
             border-radius: 6px;
             padding: 10px 14px;
-            color: #f87171;
-            font-size: 0.8rem;
-            margin-top: 16px;
+            color: #fca5a5;
+            font-size: 0.825rem;
+            margin-top: 14px;
             display: none;
         }
 
-        .footer {
+        /* FOOTER */
+        .card-footer {
             text-align: center;
-            margin-top: 24px;
-            color: #6b7280;
-            font-size: 0.8rem;
+            margin-top: 20px;
+            font-size: 0.78rem;
+            color: var(--muted2);
         }
+
+        .card-footer a {
+            color: var(--blue);
+            text-decoration: none;
+        }
+
+        /* SUPPORT LINK */
+        .support-link {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            font-size: 0.75rem;
+            color: var(--muted2);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+        }
+
+        .support-link:hover { color: var(--muted); }
     </style>
 </head>
 <body>
-    <div class="auth-container">
-        <div style="display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:8px;">
-    <svg width="40" height="40" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect width="32" height="32" rx="8" fill="#7c3aed" fill-opacity="0.2"/>
-        <path d="M8 10H11V22H8V10Z" fill="#a78bfa"/>
-        <path d="M21 10H24V22H21V22V10Z" fill="#a78bfa"/>
-        <rect x="13" y="14" width="6" height="4" rx="1" fill="#7c3aed"/>
-        <rect x="14" y="15" width="2" height="2" rx="0.5" fill="#a78bfa"/>
-    </svg>
-    <h1 style="margin:0;">Roota</h1>
-</div>
-            <p>AI-powered production debugger</p>
+
+<canvas id="shader-canvas"></canvas>
+
+<!-- BACK TO HOME -->
+<a href="/home" class="back-link">
+    ← Back to home
+</a>
+
+<div class="page">
+    <div class="auth-card">
+
+        <!-- LOGO -->
+        <div class="card-logo">
+            <svg width="44" height="44" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="1" y="1" width="30" height="30" rx="7" stroke="#3B82F6" stroke-width="2.5" fill="rgba(59,130,246,0.08)"/>
+                <circle cx="10" cy="16" r="2.5" fill="#3B82F6"/>
+                <path d="M15 11.5L21.5 16L15 20.5" stroke="#3B82F6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
         </div>
 
-        <div class="card">
-            <div class="tabs">
-                <button class="tab active" id="signupTab" onclick="switchTab('signup')">Sign Up</button>
-                <button class="tab" id="loginTab" onclick="switchTab('login')">Log In</button>
-            </div>
+        <!-- HEADING -->
+        <div class="card-heading">
+            <h1 id="cardTitle">Welcome to Roota</h1>
+            <p id="cardSubtitle">Sign in to access your dashboard.</p>
+        </div>
 
+        <!-- TABS -->
+        <div class="tabs">
+            <button class="tab active" id="signinTab" onclick="switchTab('signin')">Sign In</button>
+            <button class="tab" id="signupTab" onclick="switchTab('signup')">Create Account</button>
+        </div>
+
+        <!-- SOCIAL BUTTONS (visual only) -->
+        <div class="social-row">
+            <button class="social-btn" title="Coming soon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                GitHub
+            </button>
+            <button class="social-btn" title="Coming soon">
+                <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                Google
+            </button>
+        </div>
+
+        <!-- DIVIDER -->
+        <div class="divider">
+            <div class="divider-line"></div>
+            <span>Or continue with</span>
+            <div class="divider-line"></div>
+        </div>
+
+        <!-- SIGN IN FORM -->
+        <div id="signinForm">
             <div class="form-group">
-                <label>Email</label>
-                <input type="email" id="email" placeholder="you@company.com" autocomplete="email">
+                <div class="form-label">
+                    <span>Username or Email</span>
+                </div>
+                <input type="text" id="loginIdentifier" placeholder="username or email@example.com" autocomplete="username">
             </div>
-
             <div class="form-group">
-                <label>Password</label>
-                <input type="password" id="password" placeholder="••••••••" autocomplete="current-password">
+                <div class="form-label">
+                    <span>Password</span>
+                    <a href="#" class="forgot-link">Forgot?</a>
+                </div>
+                <div class="input-wrap">
+                    <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password">
+                    <button class="password-toggle" onclick="togglePassword('loginPassword', this)" type="button">👁</button>
+                </div>
             </div>
-
-            <button class="submit-btn" id="submitBtn" onclick="submit()">Create Account</button>
-
-            <div class="error" id="errorMsg"></div>
+            <button class="submit-btn" id="signinBtn" onclick="submitSignin()">
+                Sign In →
+            </button>
+            <div class="error-msg" id="signinError"></div>
         </div>
 
-        <div class="footer">
-            Root cause analysis, automatically.
+        <!-- SIGN UP FORM -->
+        <div id="signupForm" style="display:none;">
+            <div class="form-row">
+                <div>
+                    <div class="form-label"><span>Full Name</span></div>
+                    <input type="text" id="signupName" placeholder="Abdullah Khan" autocomplete="name">
+                </div>
+                <div>
+                    <div class="form-label"><span>Username</span></div>
+                    <input type="text" id="signupUsername" placeholder="abdullahkhan" autocomplete="username">
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="form-label"><span>Email Address</span></div>
+                <input type="email" id="signupEmail" placeholder="engineer@company.com" autocomplete="email">
+            </div>
+            <div class="form-group">
+                <div class="form-label"><span>Password</span></div>
+                <div class="input-wrap">
+                    <input type="password" id="signupPassword" placeholder="••••••••" autocomplete="new-password">
+                    <button class="password-toggle" onclick="togglePassword('signupPassword', this)" type="button">👁</button>
+                </div>
+            </div>
+            <button class="submit-btn" id="signupBtn" onclick="submitSignup()">
+                Create Account →
+            </button>
+            <div class="error-msg" id="signupError"></div>
         </div>
+
     </div>
+</div>
 
-    <script>
-        let mode = 'signup';
+<!-- SUPPORT -->
+<a href="#" class="support-link">
+    🛟 Need help? Contact support
+</a>
 
-        if (localStorage.getItem('roota_api_key')) {
-            window.location.href = '/ui';
+<script>
+    // Redirect if already logged in
+    if (localStorage.getItem('roota_api_key')) {
+        window.location.href = '/ui';
+    }
+
+    function switchTab(tab) {
+        const isSignin = tab === 'signin';
+
+        document.getElementById('signinTab').className = 'tab' + (isSignin ? ' active' : '');
+        document.getElementById('signupTab').className = 'tab' + (!isSignin ? ' active' : '');
+
+        document.getElementById('signinForm').style.display = isSignin ? 'block' : 'none';
+        document.getElementById('signupForm').style.display = isSignin ? 'none' : 'block';
+
+        document.getElementById('cardTitle').textContent = isSignin ? 'Welcome to Roota' : 'Create your account';
+        document.getElementById('cardSubtitle').textContent = isSignin ? 'Sign in to access your dashboard.' : 'Start debugging smarter today.';
+    }
+
+    function togglePassword(inputId, btn) {
+        const input = document.getElementById(inputId);
+        if (input.type === 'password') {
+            input.type = 'text';
+            btn.textContent = '🔒';
+        } else {
+            input.type = 'password';
+            btn.textContent = '👁';
+        }
+    }
+
+    async function submitSignin() {
+        const identifier = document.getElementById('loginIdentifier').value.trim();
+        const password = document.getElementById('loginPassword').value;
+        const btn = document.getElementById('signinBtn');
+        const errorEl = document.getElementById('signinError');
+
+        if (!identifier || !password) {
+            showError(errorEl, 'Please enter your username/email and password.');
+            return;
         }
 
-        function switchTab(tab) {
-            mode = tab;
-            document.getElementById('signupTab').className = 'tab' + (tab === 'signup' ? ' active' : '');
-            document.getElementById('loginTab').className = 'tab' + (tab === 'login' ? ' active' : '');
-            document.getElementById('submitBtn').textContent = tab === 'signup' ? 'Create Account' : 'Log In';
-            document.getElementById('errorMsg').style.display = 'none';
-        }
+        btn.disabled = true;
+        btn.textContent = 'Signing in...';
 
-        async function submit() {
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value;
-            const btn = document.getElementById('submitBtn');
-            const errorEl = document.getElementById('errorMsg');
+        const formData = new FormData();
+        formData.append('login', identifier);
+        formData.append('password', password);
 
-            if (!email || !password) {
-                errorEl.textContent = 'Please enter your email and password';
-                errorEl.style.display = 'block';
+        try {
+            const response = await fetch('http://127.0.0.1:8000/login', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+
+            if (data.error) {
+                showError(errorEl, data.error);
                 return;
             }
 
-            btn.disabled = true;
-            btn.textContent = mode === 'signup' ? 'Creating account...' : 'Logging in...';
+            localStorage.setItem('roota_api_key', data.api_key);
+            localStorage.setItem('roota_email', data.email);
+            localStorage.setItem('roota_username', data.username);
+            window.location.href = '/ui';
 
-            const formData = new FormData();
-            formData.append('email', email);
-            formData.append('password', password);
+        } catch (e) {
+            showError(errorEl, 'Could not connect to server. Make sure Roota is running.');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Sign In →';
+        }
+    }
 
-            try {
-                const endpoint = mode === 'signup' ? '/register' : '/login';
-                const response = await fetch(`http://127.0.0.1:8000${endpoint}`, {
-                    method: 'POST',
-                    body: formData
-                });
-                const data = await response.json();
+    async function submitSignup() {
+        const name = document.getElementById('signupName').value.trim();
+        const username = document.getElementById('signupUsername').value.trim();
+        const email = document.getElementById('signupEmail').value.trim();
+        const password = document.getElementById('signupPassword').value;
+        const btn = document.getElementById('signupBtn');
+        const errorEl = document.getElementById('signupError');
 
-                if (data.error) {
-                    errorEl.textContent = data.error;
-                    errorEl.style.display = 'block';
-                    return;
-                }
-
-                localStorage.setItem('roota_api_key', data.api_key);
-                localStorage.setItem('roota_email', data.email);
-                window.location.href = '/ui';
-
-            } catch (error) {
-                errorEl.textContent = 'Could not connect to server. Make sure Roota is running.';
-                errorEl.style.display = 'block';
-            } finally {
-                btn.disabled = false;
-                btn.textContent = mode === 'signup' ? 'Create Account' : 'Log In';
-            }
+        if (!name || !username || !email || !password) {
+            showError(errorEl, 'Please fill in all fields.');
+            return;
         }
 
-        document.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') submit();
+        if (password.length < 6) {
+            showError(errorEl, 'Password must be at least 6 characters.');
+            return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = 'Creating account...';
+
+        const formData = new FormData();
+        formData.append('name', name);
+        formData.append('username', username);
+        formData.append('email', email);
+        formData.append('password', password);
+
+        try {
+            const response = await fetch('http://127.0.0.1:8000/register', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+
+            if (data.error) {
+                showError(errorEl, data.error);
+                return;
+            }
+
+            localStorage.setItem('roota_api_key', data.api_key);
+            localStorage.setItem('roota_email', data.email);
+            localStorage.setItem('roota_username', data.username);
+            window.location.href = '/ui';
+
+        } catch (e) {
+            showError(errorEl, 'Could not connect to server. Make sure Roota is running.');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Create Account →';
+        }
+    }
+
+    function showError(el, msg) {
+        el.textContent = msg;
+        el.style.display = 'block';
+        setTimeout(() => { el.style.display = 'none'; }, 5000);
+    }
+
+    // Enter key submits
+    document.addEventListener('keypress', (e) => {
+        if (e.key !== 'Enter') return;
+        const isSignin = document.getElementById('signinForm').style.display !== 'none';
+        if (isSignin) submitSignin();
+        else submitSignup();
+    });
+
+    // SHADER — same as landing page
+    (function() {
+        const canvas = document.getElementById('shader-canvas');
+
+        function syncSize() {
+            const w = canvas.clientWidth || 1280;
+            const h = canvas.clientHeight || 720;
+            if (canvas.width !== w || canvas.height !== h) {
+                canvas.width = w; canvas.height = h;
+            }
+        }
+        if (typeof ResizeObserver !== 'undefined') new ResizeObserver(syncSize).observe(canvas);
+        syncSize();
+
+        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+        if (!gl) return;
+
+        const vs = `attribute vec2 a_position;
+varying vec2 v_texCoord;
+void main() {
+    v_texCoord = a_position * 0.5 + 0.5;
+    gl_Position = vec4(a_position, 0.0, 1.0);
+}`;
+
+        const fs = `precision highp float;
+uniform float u_time;
+uniform vec2 u_resolution;
+uniform vec2 u_mouse;
+varying vec2 v_texCoord;
+void main() {
+    vec2 uv = v_texCoord;
+    vec2 mouse = u_mouse / u_resolution;
+    float grid_size = 50.0;
+    vec2 grid_uv = fract(uv * u_resolution / grid_size);
+    float line_thickness = 0.02;
+    float grid = smoothstep(line_thickness, 0.0, abs(grid_uv.x - 0.5)) +
+                 smoothstep(line_thickness, 0.0, abs(grid_uv.y - 0.5));
+    float dist = distance(uv, mouse);
+    float glow = smoothstep(0.3, 0.0, dist) * 0.15;
+    vec3 grid_color = vec3(0.125, 0.125, 0.125);
+    vec3 accent_color = vec3(0.23, 0.51, 0.96);
+    float pulse = sin(u_time * 0.5 + uv.x * 10.0 + uv.y * 10.0) * 0.5 + 0.5;
+    float pattern = smoothstep(0.48, 0.5, fract(uv.x * 5.0 + u_time * 0.1)) *
+                    smoothstep(0.48, 0.5, fract(uv.y * 5.0 - u_time * 0.05));
+    vec3 grid_layer = mix(vec3(0.035, 0.035, 0.035), grid_color, grid * 0.3);
+    grid_layer += accent_color * glow;
+    grid_layer += accent_color * pattern * pulse * 0.1;
+    vec2 p = (uv * 2.0 - 1.0);
+    p.x *= u_resolution.x / u_resolution.y;
+    float t = u_time * 0.15;
+    for(float i = 1.0; i < 4.0; i++) {
+        p.x += 0.3 / i * sin(i * 3.0 * p.y + t + cos((t / (i * 2.0)) + i));
+        p.y += 0.3 / i * cos(i * 3.0 * p.x + t + sin((t / (i * 2.0)) + i));
+    }
+    vec3 color_obsidian = vec3(0.02, 0.02, 0.03);
+    vec3 color_cobalt = vec3(0.05, 0.2, 0.5);
+    vec3 color_accent = vec3(0.1, 0.4, 0.9);
+    float brightness = 0.5 * sin(p.x + p.y) + 0.5;
+    vec3 fluid_layer = mix(color_obsidian, color_cobalt, brightness * 0.28);
+    fluid_layer += color_accent * (0.022 / length(p));
+    float vignette = 1.0 - smoothstep(0.5, 1.5, length(v_texCoord - 0.5));
+    fluid_layer *= vignette;
+    vec3 final_color = 1.0 - (1.0 - grid_layer) * (1.0 - fluid_layer);
+    final_color *= 0.62;
+    gl_FragColor = vec4(final_color, 1.0);
+}`;
+
+        function cs(type, src) {
+            const s = gl.createShader(type);
+            gl.shaderSource(s, src); gl.compileShader(s); return s;
+        }
+
+        const prog = gl.createProgram();
+        gl.attachShader(prog, cs(gl.VERTEX_SHADER, vs));
+        gl.attachShader(prog, cs(gl.FRAGMENT_SHADER, fs));
+        gl.linkProgram(prog); gl.useProgram(prog);
+
+        const buf = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,1,-1,-1,1,1,1]), gl.STATIC_DRAW);
+        const pos = gl.getAttribLocation(prog, 'a_position');
+        gl.enableVertexAttribArray(pos);
+        gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
+
+        const uTime = gl.getUniformLocation(prog, 'u_time');
+        const uRes = gl.getUniformLocation(prog, 'u_resolution');
+        const uMouse = gl.getUniformLocation(prog, 'u_mouse');
+
+        let mouse = { x: canvas.width/2, y: canvas.height/2 };
+        window.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            if (rect.width && rect.height) {
+                mouse.x = ((e.clientX - rect.left) / rect.width) * canvas.width;
+                mouse.y = (1-(e.clientY-rect.top)/rect.height)*canvas.height;
+            }
         });
-    </script>
+
+        function render(t) {
+            if (typeof ResizeObserver === 'undefined') syncSize();
+            gl.viewport(0, 0, canvas.width, canvas.height);
+            if (uTime) gl.uniform1f(uTime, t * 0.001);
+            if (uRes) gl.uniform2f(uRes, canvas.width, canvas.height);
+            if (uMouse) gl.uniform2f(uMouse, mouse.x, mouse.y);
+            gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+            requestAnimationFrame(render);
+        }
+        render(0);
+    })();
+</script>
 </body>
 </html>

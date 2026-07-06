@@ -16,8 +16,10 @@ def init_db():
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute('''
-            CREATE TABLE IF NOT EXISTS users (
+        CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            username TEXT UNIQUE NOT NULL,
             email TEXT UNIQUE NOT NULL,
             api_key TEXT UNIQUE NOT NULL,
             password_hash TEXT NOT NULL,
@@ -96,36 +98,34 @@ def save_feedback(incident_id, rating):
     )
     conn.commit()
     conn.close()
-def create_user(email, password):
+def create_user(name, username, email, password):
     conn = get_connection()
     cursor = conn.cursor()
-    
     password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
     api_key = secrets.token_urlsafe(32)
-    
     try:
         cursor.execute(
-            'INSERT INTO users (email, api_key, password_hash, created_at) VALUES (?, ?, ?, ?)',
-            (email, api_key, password_hash, datetime.now().isoformat())
+            'INSERT INTO users (name, username, email, api_key, password_hash, created_at) VALUES (?, ?, ?, ?, ?, ?)',
+            (name, username, email, api_key, password_hash, datetime.now().isoformat())
         )
         conn.commit()
         user_id = cursor.lastrowid
         conn.close()
-        return {"id": user_id, "email": email, "api_key": api_key}
-    except sqlite3.IntegrityError:
+        return {"id": user_id, "name": name, "username": username, "email": email, "api_key": api_key}
+    except sqlite3.IntegrityError as e:
         conn.close()
-        return None
-
-def verify_user(email, password):
+        if 'username' in str(e):
+            return {"error": "Username already taken"}
+        return {"error": "Email already registered"}
+    
+def verify_user(login, password):
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute('SELECT * FROM users WHERE email = ?', (email,))
+    cursor.execute('SELECT * FROM users WHERE username = ? OR email = ?', (login, login))
     row = cursor.fetchone()
     conn.close()
-    
     if not row:
         return None
-    
     user = dict(row)
     if bcrypt.checkpw(password.encode('utf-8'), user['password_hash'].encode('utf-8')):
         return user
