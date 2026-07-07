@@ -237,7 +237,7 @@ def serve_pricing():
     return FileResponse("pricing.html")
 
 @app.get("/changelog")
-def serve_pricing():
+def serve_changelog():
     return FileResponse("changelog.html")
 
 @app.get("/privacy")
@@ -247,7 +247,6 @@ def serve_privacy():
 @app.get("/terms")
 def serve_terms():
     return FileResponse("terms.html")
-
 
 @app.post("/change-password")
 def change_password(
