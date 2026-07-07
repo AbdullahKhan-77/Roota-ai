@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roota — Changelog</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' fill='none'%3E%3Crect x='1' y='1' width='30' height='30' rx='7' stroke='%233B82F6' stroke-width='2.5' fill='%23090909'/%3E%3Ccircle cx='10' cy='16' r='2.5' fill='%233B82F6'/%3E%3Cpath d='M15 11.5L21.5 16L15 20.5' stroke='%233B82F6' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg: #09090B;
+            --surface: #111827;
+            --surface2: #1F2937;
+            --border: #27272A;
+            --blue: #3B82F6;
+            --blue-dim: #3B82F620;
+            --cyan: #06B6D4;
+            --emerald: #10B981;
+            --amber: #F59E0B;
+            --red: #EF4444;
+            --text: #F9FAFB;
+            --muted: #9CA3AF;
+            --muted2: #52525B;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+        }
+
+        /* SHADER */
+        #shader-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* NAV */
+        nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 48px;
+            background: rgba(9, 9, 9, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .logo-icon { width: 32px; height: 32px; flex-shrink: 0; }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            list-style: none;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .nav-links a {
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-links a.active, .nav-links a:hover { color: var(--text); }
+
+        .nav-actions { display: flex; gap: 10px; align-items: center; }
+
+        .btn-ghost {
+            padding: 8px 18px;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--muted);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .btn-ghost:hover { color: var(--text); border-color: #444; }
+
+        .btn-primary {
+            padding: 8px 18px;
+            background: var(--blue);
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .btn-primary:hover { background: #2563eb; }
+
+        /* PAGE HEADER */
+        .page-header {
+            position: relative;
+            z-index: 1;
+            max-width: 780px;
+            margin: 0 auto;
+            padding: 160px 24px 60px;
+            text-align: center;
+        }
+
+        .page-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 12px;
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--muted);
+            margin-bottom: 24px;
+            letter-spacing: 0.05em;
+        }
+
+        .badge-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--blue);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.8); }
+        }
+
+        .page-header h1 {
+            font-size: clamp(2.2rem, 5vw, 3.2rem);
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            margin-bottom: 16px;
+        }
+
+        .page-header p {
+            color: var(--muted);
+            font-size: 1.05rem;
+            line-height: 1.7;
+        }
+
+        /* TIMELINE */
+        .timeline-wrap {
+            position: relative;
+            z-index: 1;
+            max-width: 780px;
+            margin: 0 auto;
+            padding: 0 24px 120px;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 36px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 7px;
+            top: 8px;
+            bottom: 8px;
+            width: 1px;
+            background: linear-gradient(180deg, var(--blue), var(--border) 15%, var(--border) 85%, transparent);
+        }
+
+        .release {
+            position: relative;
+            padding-bottom: 56px;
+        }
+
+        .release:last-child { padding-bottom: 0; }
+
+        .release-dot {
+            position: absolute;
+            left: -36px;
+            top: 6px;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: var(--bg);
+            border: 2px solid var(--blue);
+        }
+
+        .release.latest .release-dot {
+            background: var(--blue);
+            box-shadow: 0 0 0 4px var(--blue-dim);
+        }
+
+        .release-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 6px;
+            flex-wrap: wrap;
+        }
+
+        .release-version {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--blue);
+            background: var(--blue-dim);
+            border: 1px solid #1e3a5f;
+            border-radius: 6px;
+            padding: 2px 10px;
+        }
+
+        .release-date {
+            font-size: 0.8rem;
+            color: var(--muted2);
+        }
+
+        .latest-tag {
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: var(--emerald);
+            background: #0f2b20;
+            border: 1px solid #16532f;
+            border-radius: 4px;
+            padding: 2px 8px;
+        }
+
+        .release-title {
+            font-size: 1.35rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            margin-bottom: 14px;
+        }
+
+        .release-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px 22px;
+        }
+
+        .change-list { list-style: none; }
+        .change-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 9px 0;
+            border-bottom: 1px solid #1a1a1f;
+            font-size: 0.9rem;
+            color: #d1d5db;
+            line-height: 1.6;
+        }
+
+        .change-item:last-child { border-bottom: none; }
+
+        .tag {
+            flex-shrink: 0;
+            margin-top: 1px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            padding: 2px 8px;
+            border-radius: 4px;
+            white-space: nowrap;
+        }
+
+        .tag.added { background: #0f2b20; color: #34d399; border: 1px solid #16532f; }
+        .tag.improved { background: #16233a; color: #93c5fd; border: 1px solid #1e3a5f; }
+        .tag.fixed { background: #3a2c0f; color: #fbbf24; border: 1px solid #78350f; }
+
+        .end-note {
+            text-align: center;
+            color: var(--muted2);
+            font-size: 0.85rem;
+            margin-top: 50px;
+            padding-top: 40px;
+            border-top: 1px solid var(--border);
+        }
+
+        .end-note a { color: var(--blue); text-decoration: none; }
+        .end-note a:hover { text-decoration: underline; }
+
+        /* FOOTER */
+        footer {
+            position: relative;
+            z-index: 1;
+            border-top: 1px solid var(--border);
+            padding: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        footer p { color: var(--muted2); font-size: 0.85rem; }
+
+        @media (max-width: 640px) {
+            nav { padding: 16px 20px; }
+            .nav-links { display: none; }
+            .page-header { padding: 120px 20px 40px; }
+            footer { padding: 32px 20px; flex-direction: column; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="shader-canvas"></canvas>
+
+<nav>
+    <a href="/home" class="nav-logo">
+        <svg class="logo-icon" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="1" y="1" width="30" height="30" rx="7" stroke="#3B82F6" stroke-width="2.5" fill="none"/>
+            <circle cx="10" cy="16" r="2.5" fill="#3B82F6"/>
+            <path d="M15 11.5L21.5 16L15 20.5" stroke="#3B82F6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Roota
+    </a>
+
+    <ul class="nav-links">
+        <li><a href="/home#features">Features</a></li>
+        <li><a href="/docs-page">Docs</a></li>
+        <li><a href="/pricing">Pricing</a></li>
+        <li><a href="/changelog" class="active">Changelog</a></li>
+    </ul>
+
+    <div class="nav-actions">
+        <a href="/login" class="btn-ghost">Sign In</a>
+        <a href="/login" class="btn-primary">Start Free</a>
+    </div>
+</nav>
+
+<header class="page-header">
+    <div class="page-badge">
+        <span class="badge-dot"></span>
+        BUILD LOG
+    </div>
+    <h1>Changelog</h1>
+    <p>Every shipped update to Roota, in one place — from the first CLI prototype to the engineering ops dashboard.</p>
+</header>
+
+<div class="timeline-wrap">
+    <div class="timeline">
+
+        <div class="release latest">
+            <div class="release-dot"></div>
+            <div class="release-meta">
+                <span class="release-version">v0.4.0</span>
+                <span class="release-date">July 2026</span>
+                <span class="latest-tag">Latest</span>
+            </div>
+            <div class="release-title">The engineering ops dashboard</div>
+            <div class="release-card">
+                <ul class="change-list">
+                    <li class="change-item"><span class="tag added">Added</span> Full Overview dashboard — upload or paste logs, pick a repo, and get an AI diagnosis with line, error, and warning counts.</li>
+                    <li class="change-item"><span class="tag added">Added</span> Incidents view with the complete history of every analysis and inline "Correct / Incorrect" feedback.</li>
+                    <li class="change-item"><span class="tag added">Added</span> Logs explorer to inspect the raw input and parsed entries behind any past incident.</li>
+                    <li class="change-item"><span class="tag added">Added</span> Profile tab — see your name, email, member-since date, incidents analyzed, and your API key with copy/reveal.</li>
+                    <li class="change-item"><span class="tag added">Added</span> SDK snippets for C++, Python, and JS right inside the dashboard.</li>
+                    <li class="change-item"><span class="tag improved">Improved</span> New sidebar navigation shell shared across Overview, Incidents, Logs, Infrastructure, Profile, and Settings.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="release">
+            <div class="release-dot"></div>
+            <div class="release-meta">
+                <span class="release-version">v0.3.0</span>
+                <span class="release-date">June 2026</span>
+            </div>
+            <div class="release-title">Real authentication</div>
+            <div class="release-card">
+                <ul class="change-list">
+                    <li class="change-item"><span class="tag added">Added</span> Dedicated Sign Up and Log In pages, styled to match the landing page's shader background.</li>
+                    <li class="change-item"><span class="tag added">Added</span> Email + password accounts with first and last name, backed by hashed passwords and per-user API keys.</li>
+                    <li class="change-item"><span class="tag improved">Improved</span> "Get Started" and "Start Free" now route straight to Sign Up; "Sign In" goes to Log In.</li>
+                    <li class="change-item"><span class="tag fixed">Fixed</span> Existing accounts migrate safely to the new schema — no data loss for early users.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="release">
+            <div class="release-dot"></div>
+            <div class="release-meta">
+                <span class="release-version">v0.2.0</span>
+                <span class="release-date">June 2026</span>
+            </div>
+            <div class="release-title">Docs go live</div>
+            <div class="release-card">
+                <ul class="change-list">
+                    <li class="change-item"><span class="tag added">Added</span> Public documentation page covering setup, the analyze API, and SDK usage.</li>
+                    <li class="change-item"><span class="tag improved">Improved</span> Shared visual system (Space Grotesk, WebGL fluid background, dark cobalt palette) applied consistently across marketing pages.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="release">
+            <div class="release-dot"></div>
+            <div class="release-meta">
+                <span class="release-version">v0.1.0</span>
+                <span class="release-date">May 2026</span>
+            </div>
+            <div class="release-title">First light</div>
+            <div class="release-card">
+                <ul class="change-list">
+                    <li class="change-item"><span class="tag added">Added</span> Landing page introducing Roota's positioning: an AI debugger for high-concurrency systems.</li>
+                    <li class="change-item"><span class="tag added">Added</span> Core CLI: <code style="font-family:'JetBrains Mono',monospace;">debugai --log crash.log</code> parses tracebacks and crash dumps and sends structured context to Claude for diagnosis.</li>
+                    <li class="change-item"><span class="tag added">Added</span> C++ crash dump support via <code style="font-family:'JetBrains Mono',monospace;">addr2line</code>, resolving raw memory addresses to source file and line.</li>
+                    <li class="change-item"><span class="tag added">Added</span> GitHub repo integration so diagnoses reference your actual source, not just the log.</li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="end-note">
+        That's everything so far. Have a request or spot a bug? <a href="mailto:abdkhan1076@gmail.com">Reach out directly</a>.
+    </div>
+</div>
+
+<footer>
+    <a href="/home" class="nav-logo" style="text-decoration:none;">
+        <svg class="logo-icon" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="1" y="1" width="30" height="30" rx="7" stroke="#3B82F6" stroke-width="2.5" fill="none"/>
+            <circle cx="10" cy="16" r="2.5" fill="#3B82F6"/>
+            <path d="M15 11.5L21.5 16L15 20.5" stroke="#3B82F6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Roota
+    </a>
+    <p>© 2026 Roota Technologies. All rights reserved.</p>
+</footer>
+
+<script>
+// ─── WEBGL FLUID SHADER (Obsidian & Cobalt) — identical to landing/docs ───
+(function() {
+    const canvas = document.getElementById('shader-canvas');
+    canvas.style.position = 'fixed';
+    canvas.style.top = '0';
+    canvas.style.left = '0';
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
+    canvas.style.zIndex = '0';
+    canvas.style.pointerEvents = 'none';
+
+    function syncSize() {
+        const w = canvas.clientWidth || 1280;
+        const h = canvas.clientHeight || 720;
+        if (canvas.width !== w || canvas.height !== h) {
+            canvas.width = w;
+            canvas.height = h;
+        }
+    }
+    if (typeof ResizeObserver !== 'undefined') {
+        new ResizeObserver(syncSize).observe(canvas);
+    }
+    syncSize();
+
+    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    if (!gl) return;
+
+    const vs = `attribute vec2 a_position;
+varying vec2 v_texCoord;
+void main() {
+    v_texCoord = a_position * 0.5 + 0.5;
+    gl_Position = vec4(a_position, 0.0, 1.0);
+}`;
+
+    const fs = `precision highp float;
+uniform float u_time;
+uniform vec2 u_resolution;
+uniform vec2 u_mouse;
+varying vec2 v_texCoord;
+
+void main() {
+    vec2 uv = v_texCoord;
+    vec2 mouse = u_mouse / u_resolution;
+
+    float grid_size = 50.0;
+    vec2 grid_uv = fract(uv * u_resolution / grid_size);
+
+    float line_thickness = 0.02;
+    float grid = smoothstep(line_thickness, 0.0, abs(grid_uv.x - 0.5)) +
+                 smoothstep(line_thickness, 0.0, abs(grid_uv.y - 0.5));
+
+    float dist = distance(uv, mouse);
+    float glow = smoothstep(0.3, 0.0, dist) * 0.15;
+
+    vec3 grid_color = vec3(0.125, 0.125, 0.125);
+    vec3 accent_color = vec3(0.23, 0.51, 0.96);
+
+    float pulse = sin(u_time * 0.5 + uv.x * 10.0 + uv.y * 10.0) * 0.5 + 0.5;
+    float pattern = smoothstep(0.48, 0.5, fract(uv.x * 5.0 + u_time * 0.1)) *
+                    smoothstep(0.48, 0.5, fract(uv.y * 5.0 - u_time * 0.05));
+
+    vec3 grid_layer = mix(vec3(0.035, 0.035, 0.035), grid_color, grid * 0.3);
+    grid_layer += accent_color * glow;
+    grid_layer += accent_color * pattern * pulse * 0.1;
+
+    vec2 p = (uv * 2.0 - 1.0);
+    p.x *= u_resolution.x / u_resolution.y;
+
+    float t = u_time * 0.15;
+    for(float i = 1.0; i < 4.0; i++) {
+        p.x += 0.3 / i * sin(i * 3.0 * p.y + t + cos((t / (i * 2.0)) + i));
+        p.y += 0.3 / i * cos(i * 3.0 * p.x + t + sin((t / (i * 2.0)) + i));
+    }
+
+    vec3 color_obsidian = vec3(0.02, 0.02, 0.03);
+    vec3 color_cobalt = vec3(0.05, 0.2, 0.5);
+    vec3 color_accent = vec3(0.1, 0.4, 0.9);
+
+    float brightness = 0.5 * sin(p.x + p.y) + 0.5;
+    vec3 fluid_layer = mix(color_obsidian, color_cobalt, brightness * 0.28);
+    fluid_layer += color_accent * (0.022 / length(p));
+
+    float vignette = 1.0 - smoothstep(0.5, 1.5, length(v_texCoord - 0.5));
+    fluid_layer *= vignette;
+
+    vec3 final_color = 1.0 - (1.0 - grid_layer) * (1.0 - fluid_layer);
+    final_color *= 0.62;
+
+    gl_FragColor = vec4(final_color, 1.0);
+}`;
+
+    function cs(type, src) {
+        const s = gl.createShader(type);
+        gl.shaderSource(s, src);
+        gl.compileShader(s);
+        return s;
+    }
+
+    const prog = gl.createProgram();
+    gl.attachShader(prog, cs(gl.VERTEX_SHADER, vs));
+    gl.attachShader(prog, cs(gl.FRAGMENT_SHADER, fs));
+    gl.linkProgram(prog);
+    gl.useProgram(prog);
+
+    const buf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+    const pos = gl.getAttribLocation(prog, 'a_position');
+    gl.enableVertexAttribArray(pos);
+    gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
+
+    const uTime = gl.getUniformLocation(prog, 'u_time');
+    const uRes = gl.getUniformLocation(prog, 'u_resolution');
+    const uMouse = gl.getUniformLocation(prog, 'u_mouse');
+
+    let mouse = { x: canvas.width / 2, y: canvas.height / 2 };
+    window.addEventListener('mousemove', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        if (rect.width && rect.height) {
+            const nx = (e.clientX - rect.left) / rect.width;
+            const ny = 1.0 - (e.clientY - rect.top) / rect.height;
+            mouse.x = nx * canvas.width;
+            mouse.y = ny * canvas.height;
+        }
+    });
+
+    function render(t) {
+        if (typeof ResizeObserver === 'undefined') syncSize();
+        gl.viewport(0, 0, canvas.width, canvas.height);
+        if (uTime) gl.uniform1f(uTime, t * 0.001);
+        if (uRes) gl.uniform2f(uRes, canvas.width, canvas.height);
+        if (uMouse) gl.uniform2f(uMouse, mouse.x, mouse.y);
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+        requestAnimationFrame(render);
+    }
+    render(0);
+})();
+</script>
+</body>
+</html>

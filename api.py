@@ -236,6 +236,19 @@ def serve_docs():
 def serve_pricing():
     return FileResponse("pricing.html")
 
+@app.get("/changelog")
+def serve_pricing():
+    return FileResponse("changelog.html")
+
+@app.get("/privacy")
+def serve_privacy():
+    return FileResponse("privacy.html")
+
+@app.get("/terms")
+def serve_terms():
+    return FileResponse("terms.html")
+
+
 @app.post("/change-password")
 def change_password(
     current_password: str = Form(...),
