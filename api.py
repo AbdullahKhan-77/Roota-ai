@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File, Form, Query,Header
+from fastapi import FastAPI, UploadFile, File, Form, Query,Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
 import tempfile
@@ -47,10 +47,14 @@ def serve_home():
 async def analyze(
     log_file: UploadFile = File(...),
     repo: Optional[str] = Form(None),
-    x_api_key: Optional[str] = Header(None)
+    x_api_key: str = Header(None) 
 ):
-    user = get_user_by_api_key(x_api_key) if x_api_key else None
-    user_id = user['id'] if user else None
+    if not x_api_key:
+        raise HTTPException(status_code=401, detail="API key required")
+    user = get_user_by_api_key(x_api_key)
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid API key")
+    user_id = user['id']
     
     with tempfile.NamedTemporaryFile(mode='wb', suffix='.log', delete=False) as tmp:
         content = await log_file.read()
@@ -66,6 +70,8 @@ async def analyze(
             filenames = extract_filenames(errors)
             repo = repo.strip().strip('/')
             parts = repo.split('/')
+            if len(parts) != 2:
+                raise HTTPException(status_code=400, detail="repo must be in 'owner/repo_name' format ")
             owner, repo_name = parts[0], parts[1]
             branch = get_default_branch(owner, repo_name)
             code_context = {}
@@ -117,24 +123,41 @@ async def analyze(
 @app.get("/incidents")
 def list_incidents(x_api_key: str = Header(None)):
     if not x_api_key:
-        return {"error": "API key required", "incidents": []}
+        raise HTTPException(status_code=401, detail="API key required")
     user = get_user_by_api_key(x_api_key)
     if not user:
-        return {"error": "Invalid API key", "incidents": []}
+        raise HTTPException(status_code=401, detail="Invalid API key")
     incidents = get_user_incidents(user['id'])
     return {"incidents": incidents}
 
 @app.get("/incidents/{incident_id}")
-def get_incident_by_id(incident_id: int):
+def get_incident_by_id(incident_id: int, x_api_key: str = Header(None)):
+    if not x_api_key:
+        raise HTTPException(status_code=401, detail="API key required")
+    user = get_user_by_api_key(x_api_key)
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid API key")
     incident = get_incident(incident_id)
     if not incident:
-        return {"error": "Incident not found"}
+        raise HTTPException(status_code=404, detail="Incident not found")
+    if incident['user_id'] != user['id']:
+        raise HTTPException(status_code=404, detail="Not found")
     incident['errors'] = json.loads(incident['errors'])
     incident['warnings'] = json.loads(incident['warnings'])
     return incident
 
 @app.post("/incidents/{incident_id}/feedback")
-def submit_feedback(incident_id: int, rating: str = Query(...)):
+def submit_feedback(incident_id: int, rating: str = Query(...), x_api_key: str = Header(None)):
+    if not x_api_key:
+        raise HTTPException(status_code=401, detail="API key required")
+    user = get_user_by_api_key(x_api_key)
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid API key")
+    incident = get_incident(incident_id)
+    if not incident:
+        raise HTTPException(status_code=404, detail="Incident not found")
+    if incident['user_id'] != user['id']:
+        raise HTTPException(status_code=404, detail="Not found")
     save_feedback(incident_id, rating)
     return {"status": "feedback saved", "incident_id": incident_id, "rating": rating}
 
@@ -143,7 +166,13 @@ def serve_ui():
     return FileResponse("index.html")
 
 @app.post("/ingest")
-async def ingest(data: dict):
+async def ingest(data: dict, x_api_key: str = Header(None)):
+    if not x_api_key:
+        raise HTTPException(status_code=401, detail="API key required")
+    user = get_user_by_api_key(x_api_key)
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid API key")
+
     try:
         log_text = data.get('log_text', '')
         repo = data.get('repo', None)
@@ -159,7 +188,11 @@ async def ingest(data: dict):
         code_context = None
         if repo and errors:
             filenames = extract_filenames(errors)
-            owner, repo_name = repo.split('/')
+            repo = repo.strip().strip('/')
+            parts = repo.split('/')
+            if len(parts) != 2:
+                raise HTTPException(status_code=400, detail="repo must be in 'owner/repo_name' format")
+            owner, repo_name = parts[0], parts[1]
             branch = get_default_branch(owner, repo_name)
             code_context = {}
             file_tree = get_repo_file_tree(owner, repo_name, branch)
@@ -184,7 +217,8 @@ async def ingest(data: dict):
             errors=errors,
             warnings=warnings,
             diagnosis=diagnosis,
-            total_lines=len(entries)
+            total_lines=len(entries),
+            user_id=user['id']
         )
 
         os.unlink(tmp_path)
@@ -193,9 +227,12 @@ async def ingest(data: dict):
             "status": "success",
             "incident_id": incident_id,
             "source": source,
-            "errors_found": len(errors)
+            "errors_found": len(errors),
+            "diagnosis": diagnosis
         }
 
+    except HTTPException:
+        raise
     except Exception as e:
         return {"status": "error", "message": str(e)}
     

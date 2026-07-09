@@ -8,7 +8,8 @@ DEBUGAI_SERVER = "http://127.0.0.1:8000"
 _config = {
     "repo": None,
     "server": DEBUGAI_SERVER,
-    "enabled": True
+    "enabled": True,
+    "api_key": None
 }
 
 
@@ -42,24 +43,35 @@ def _exception_handler(exc_type, exc_value, exc_traceback):
                 "repo": _config["repo"],
                 "source": "python_sdk"
             },
+            headers={"X-API-Key": _config["api_key"]},
             timeout=30
         )
         data = response.json()
         if data.get("status") == "success":
-            print(f"[debugai] Incident #{data['incident_id']} captured. View at {_config['server']}/ui")
+            print(f"[debugai] Incident #{data['incident_id']} captured.")
+            if data.get("diagnosis"):
+                print(f"\n{'='*60}")
+                print("[debugai] DIAGNOSIS")
+                print(f"{'='*60}")
+                print(data["diagnosis"])
+                print(f"{'='*60}\n")
+            print(f"[debugai] View full incident at {_config['server']}/ui")
         else:
             print(f"[debugai] Capture failed: {data.get('message', 'unknown error')}")
     except Exception as e:
         print(f"[debugai] Could not send crash report: {e}")
 
     sys.__excepthook__(exc_type, exc_value, exc_traceback)
+    
+def install(repo=None, server=None, api_key=None):
+    if not api_key:
+        raise ValueError("[debugai] api_key is required. Get yours from your Roota dashboard and pass it to install(api_key=...)")
 
-
-def install(repo=None, server=None):
     if repo:
         _config["repo"] = repo
     if server:
         _config["server"] = server
+    _config["api_key"] = api_key
 
     sys.excepthook = _exception_handler
     print(f"[debugai] Crash handler installed. Server: {_config['server']}")

@@ -2,3 +2,7 @@
 venv
 __pycache__/
 *.pyc
+.roota.json
+debugai.db
+*.log
+test_handler

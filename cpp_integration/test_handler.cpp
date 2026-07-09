@@ -1,11 +1,11 @@
-#include <iostream>
+// test_crash.cpp
 #include "debugai_handler.h"
 
 int main() {
-    debugai::install_crash_handler("crash_reports");
+    debugai::install_crash_handler(".");
 
-    int* ptr = nullptr;
-    std::cout << "About to crash..." << std::endl;
-    std::cout << *ptr << std::endl;
+    int* p = nullptr;
+    *p = 42;  // deliberate null pointer dereference -> SIGSEGV
+
     return 0;
 }
