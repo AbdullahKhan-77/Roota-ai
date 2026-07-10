@@ -1,6 +1,148 @@
 #ifndef DEBUGAI_HANDLER_H
 #define DEBUGAI_HANDLER_H
 
+#ifdef _WIN32
+#include <windows.h>
+#include <dbghelp.h>
+#include<ctime>
+
+namespace debugai {
+
+inline char g_output_dir_win[512] = ".";
+
+inline void win_write_str(HANDLE h, const char* s) {
+    DWORD written;
+    DWORD len = 0;
+    while (s[len]) len++;
+    WriteFile(h, s, len, &written, nullptr);
+}
+
+inline void win_write_hex(HANDLE h, unsigned long long val) {
+    char buf[20];
+    int i = 18;
+    buf[19] = '\0';
+    if (val == 0) {
+        buf[i--] = '0';
+    }
+    while (val > 0 && i >= 0) {
+        int digit = val & 0xF;
+        buf[i--] = (digit < 10) ? ('0' + digit) : ('a' + digit - 10);
+        val >>= 4;
+    }
+    win_write_str(h, &buf[i + 1]);
+}
+
+inline void win_write_int(HANDLE h, long val) {
+    char buf[24];
+    int i = 22;
+    buf[23] = '\0';
+    if (val == 0) {
+        buf[i--] = '0';
+    }
+    bool neg = val < 0;
+    unsigned long uval = neg ? -val : val;
+    while (uval > 0 && i >= 0) {
+        buf[i--] = '0' + (uval % 10);
+        uval /= 10;
+    }
+    if (neg) buf[i--] = '-';
+    win_write_str(h, &buf[i + 1]);
+}
+
+inline LONG WINAPI crash_handler_win(EXCEPTION_POINTERS* pExceptionInfo) {
+    time_t now = time(nullptr);
+
+    char filename[600];
+    int n = 0;
+    const char* dir = g_output_dir_win;
+    while (*dir && n < 500) filename[n++] = *dir++;
+
+    const char* prefix = "\\crash_report_";
+    const char* p = prefix;
+    while (*p && n < 550) filename[n++] = *p++;
+
+    {
+        char numbuf[24];
+        int ni = 22;
+        numbuf[23] = '\0';
+        unsigned long val = (unsigned long)now;
+        if (val == 0) numbuf[ni--] = '0';
+        while (val > 0 && ni >= 0) {
+            numbuf[ni--] = '0' + (val % 10);
+            val /= 10;
+        }
+        const char* numstart = &numbuf[ni + 1];
+        while (*numstart && n < 590) filename[n++] = *numstart++;
+    }
+
+    const char* suffix = ".log";
+    const char* s = suffix;
+    while (*s && n < 599) filename[n++] = *s++;
+    filename[n] = '\0';
+
+    HANDLE hFile = CreateFileA(
+        filename, GENERIC_WRITE, 0, nullptr,
+        CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr
+    );
+
+    if (hFile == INVALID_HANDLE_VALUE) {
+        return EXCEPTION_EXECUTE_HANDLER;
+    }
+
+    char exe_path[1024];
+    DWORD len = GetModuleFileNameA(nullptr, exe_path, sizeof(exe_path));
+    if (len == 0) {
+        exe_path[0] = '\0';
+    }
+
+    HMODULE hModule = nullptr;
+    GetModuleHandleExA(0, nullptr, &hModule);
+    unsigned long long base_address = (unsigned long long)hModule;
+
+    win_write_str(hFile, "BASE_MAP: ");
+    win_write_hex(hFile, base_address);
+    win_write_str(hFile, "  ");
+    win_write_str(hFile, exe_path);
+    win_write_str(hFile, "\n");
+
+    DWORD exception_code = pExceptionInfo->ExceptionRecord->ExceptionCode;
+    win_write_str(hFile, "SIGNAL: ");
+    win_write_int(hFile, (long)exception_code);
+    win_write_str(hFile, "\n");
+
+#if defined(_M_X64) || defined(__x86_64__)
+    unsigned long long rip = pExceptionInfo->ContextRecord->Rip;
+#else
+    unsigned long long rip = pExceptionInfo->ContextRecord->Eip;
+#endif
+
+    win_write_str(hFile, "CRASH_ADDRESS: 0x");
+    win_write_hex(hFile, rip);
+    win_write_str(hFile, "\n");
+
+    win_write_str(hFile, "TIMESTAMP: ");
+    win_write_int(hFile, (long)now);
+    win_write_str(hFile, "\n");
+
+    CloseHandle(hFile);
+
+    return EXCEPTION_EXECUTE_HANDLER;
+}
+
+inline void install_crash_handler(const char* output_dir = ".") {
+    size_t i = 0;
+    while (output_dir[i] && i < sizeof(g_output_dir_win) - 1) {
+        g_output_dir_win[i] = output_dir[i];
+        i++;
+    }
+    g_output_dir_win[i] = '\0';
+
+    SetUnhandledExceptionFilter(crash_handler_win);
+}
+
+}
+#else
+   
 #include <csignal>
 #include <cstdlib>
 #include <cstring>
@@ -171,5 +313,6 @@ inline void install_crash_handler(const char* output_dir = ".") {
 }
 
 }
+#endif
 
 #endif

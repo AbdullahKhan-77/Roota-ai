@@ -245,7 +245,7 @@ def register(
 ):
     result = create_user(name, username, email, password)
     if result.get("error"):
-        return {"error": result["error"]}
+        raise HTTPException(status_code=400, detail=result["error"])
     return {
         "status": "success",
         "email": result["email"],
@@ -257,7 +257,7 @@ def register(
 def login(login: str = Form(...), password: str = Form(...)):
     user = verify_user(login, password)
     if not user:
-        return {"error": "Invalid username/email or password"}
+        raise HTTPException(status_code=401, detail="Invalid username/email or password")
     return {
         "status": "success",
         "email": user["email"],
@@ -292,14 +292,14 @@ def change_password(
     x_api_key: Optional[str] = Header(None)
 ):
     if not x_api_key:
-        return {"error": "Authentication required"}
+        raise HTTPException(status_code=401, detail="Authentication required")
     user = get_user_by_api_key(x_api_key)
     if not user:
-        return {"error": "Invalid API key"}
-    
+        raise HTTPException(status_code=401, detail="Invalid API key")
+
     if not bcrypt.checkpw(current_password.encode('utf-8'), user['password_hash'].encode('utf-8')):
-        return {"error": "Current password is incorrect"}
-    
+        raise HTTPException(status_code=400, detail="Current password is incorrect")
+
     new_hash = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()

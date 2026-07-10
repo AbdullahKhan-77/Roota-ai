@@ -6,3 +6,6 @@ __pycache__/
 debugai.db
 *.log
 test_handler
+
+cpp_integration/test_crash_win.exe
+cpp_integration/test_crash_win_aslr.exe

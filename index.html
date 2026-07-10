@@ -1317,6 +1317,15 @@ async function analyze() {
 
         const data = await response.json();
 
+        if (!response.ok) {
+            if (response.status === 401) {
+                logout();
+                return;
+            }
+            alert(data.detail || 'Analysis failed.');
+            return;
+        }
+
         document.getElementById('statLines').textContent = data.stats.total_lines;
         document.getElementById('statErrors').textContent = data.stats.errors;
         document.getElementById('statWarnings').textContent = data.stats.warnings;
@@ -1344,6 +1353,14 @@ async function loadIncidents() {
         const response = await fetch('/incidents', {
             headers: { 'X-API-Key': currentApiKey }
         });
+        if (!response.ok) {
+            if (response.status === 401) {
+                logout();
+                return;
+            }
+            console.error('Failed to load incidents:', response.status);
+            return;
+        }
         const data = await response.json();
         const list = document.getElementById('recentIncidentsList');
 
@@ -1387,6 +1404,14 @@ async function loadIncidentsTable() {
         const response = await fetch('/incidents', {
             headers: { 'X-API-Key': currentApiKey }
         });
+        if (!response.ok) {
+            if (response.status === 401) {
+                logout();
+                return;
+            }
+            console.error('Failed to load incidents table:', response.status);
+            return;
+        }
         const data = await response.json();
         allIncidents = data.incidents || [];
         renderIncidentsTable(allIncidents);
@@ -1434,6 +1459,15 @@ async function submitFeedback(incidentId, rating, btn) {
             method: 'POST',
             headers: { 'X-API-Key': currentApiKey }
         });
+                if (!response.ok) {
+            if (response.status === 401) {
+                logout();
+                return;
+            }
+            console.error('Failed to submit feedback:', response.status);
+            return;
+        }
+
         btn.classList.add(rating === 'correct' ? 'marked-correct' : 'marked-incorrect');
         btn.textContent = rating === 'correct' ? '✓ Correct' : '✗ Incorrect';
     } catch (e) {
@@ -1501,15 +1535,20 @@ async function changePassword() {
 
         const data = await response.json();
 
-        if (data.error) {
-            errorEl.textContent = data.error;
+        if (!response.ok) {
+            if (response.status === 401) {
+                logout();
+                return;
+            }
+            errorEl.textContent = data.detail || 'Something went wrong.';
             errorEl.style.display = 'block';
-        } else {
-            successEl.style.display = 'block';
-            document.getElementById('currentPassword').value = '';
-            document.getElementById('newPassword').value = '';
-            document.getElementById('confirmPassword').value = '';
+            return;
         }
+
+       successEl.style.display = 'block';
+        document.getElementById('currentPassword').value = '';
+        document.getElementById('newPassword').value = '';
+        document.getElementById('confirmPassword').value = '';
     } catch (e) {
         errorEl.textContent = 'Could not connect to server.';
         errorEl.style.display = 'block';

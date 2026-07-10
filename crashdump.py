@@ -3,8 +3,8 @@ import re
 import httpx
 import time
 
-BASE_MAP_PATTERN = re.compile(r'BASE_MAP:\s+([0-9a-f]+)-[0-9a-f]+.*\s{2,}(.+)$')
-SIGNAL_PATTERN = re.compile(r'SIGNAL:\s+(\d+)')
+BASE_MAP_PATTERN = re.compile(r'BASE_MAP:\s+([0-9a-f]+)(?:-[0-9a-f]+.*?)?\s{2,}(.+)$')
+SIGNAL_PATTERN = re.compile(r'SIGNAL:\s+(-?\d+)')
 CRASH_ADDRESS_PATTERN = re.compile(r'CRASH_ADDRESS:\s+(0x[0-9a-f]+)')
 TIMESTAMP_PATTERN = re.compile(r'TIMESTAMP:\s+(\d+)')
 
@@ -13,9 +13,13 @@ SIGNAL_NAMES = {
     6: "SIGABRT",
     8: "SIGFPE",
     4: "SIGILL",
-    7: "SIGBUS"
+    7: "SIGBUS",
+    -1073741819: "EXCEPTION_ACCESS_VIOLATION",
+    -1073741676: "EXCEPTION_INT_DIVIDE_BY_ZERO",
+    -1073741795: "EXCEPTION_ILLEGAL_INSTRUCTION",
+    -1073741571: "EXCEPTION_STACK_OVERFLOW",
+    -2147483645: "EXCEPTION_BREAKPOINT"
 }
-
 
 def parse_crash_report(filepath):
     result = {}
@@ -45,32 +49,46 @@ def parse_crash_report(filepath):
 def calculate_file_offset(crash_address, base_address):
     return crash_address - base_address
 
-
-def resolve_address(binary_path, file_offset):
-    hex_offset = hex(file_offset)
-
-    result = subprocess.run(
-        ["wsl", "addr2line", "-e", binary_path, hex_offset],
-        capture_output=True,
-        text=True
-    )
-
-    output = result.stdout.strip()
-    return output
-
+def resolve_address(binary_path, address_or_offset, is_windows=False):
+    if is_windows:
+        result = subprocess.run(
+            ["addr2line", "-e", binary_path, hex(address_or_offset)],
+            capture_output=True,
+            text=True
+        )
+    else:
+        result = subprocess.run(
+            ["wsl", "addr2line", "-e", binary_path, hex(address_or_offset)],
+            capture_output=True,
+            text=True
+        )
+    return result.stdout.strip()
 
 def diagnose_crash(binary_path, crash_address, base_address):
-    file_offset = calculate_file_offset(crash_address, base_address)
-    location = resolve_address(binary_path, file_offset)
+    is_windows = binary_path.lower().endswith('.exe')
+
+    if is_windows:
+        location = resolve_address(binary_path, crash_address, is_windows=True)
+    else:
+        file_offset = calculate_file_offset(crash_address, base_address)
+        location = resolve_address(binary_path, file_offset, is_windows=False)
 
     if location.startswith("??"):
-        raise RuntimeError(
-            f"Could not resolve crash location — '{binary_path}' appears to be missing debug symbols. "
-            f"Recompile with the -g flag (e.g. g++ -g -o your_app your_app.cpp) and try again."
-        )
+        if is_windows:
+            raise RuntimeError(
+                f"Could not resolve crash location for '{binary_path}'. This usually means one of two things: "
+                f"(1) the binary was compiled without debug symbols — recompile with -g, or "
+                f"(2) ASLR randomized the load address — recompile with the linker flag "
+                f"-Wl,--disable-dynamicbase so addresses stay predictable. "
+                f"See the Windows setup guide in the README for details."
+            )
+        else:
+            raise RuntimeError(
+                f"Could not resolve crash location — '{binary_path}' appears to be missing debug symbols. "
+                f"Recompile with the -g flag (e.g. g++ -g -o your_app your_app.cpp) and try again."
+            )
 
     return location
-
 
 def diagnose_from_report(report_path):
     report = parse_crash_report(report_path)
