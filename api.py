@@ -14,7 +14,8 @@ from fastapi.responses import FileResponse, RedirectResponse
 import sqlite3
 import bcrypt
 from database import DB_PATH
-
+from database import set_reset_token, get_user_by_reset_token, clear_reset_token
+from email_utils import send_reset_email
 
 app = FastAPI(title="Roota API", version="0.1.0")
 
@@ -285,6 +286,10 @@ def serve_privacy():
 def serve_terms():
     return FileResponse("terms.html")
 
+@app.get("/reset-password")
+def serve_reset_password():
+    return FileResponse("reset_password.html")
+
 @app.post("/change-password")
 def change_password(
     current_password: str = Form(...),
@@ -306,4 +311,31 @@ def change_password(
     cursor.execute('UPDATE users SET password_hash = ? WHERE id = ?', (new_hash, user['id']))
     conn.commit()
     conn.close()
+    return {"status": "success"}
+
+@app.post("/forgot-password")
+def forgot_password(email: str = Form(...)):
+    token = set_reset_token(email)
+    if token:
+        try:
+            send_reset_email(email, token)
+        except Exception as e:
+            print(f"Failed to send reset email: {e}")
+    return {"status": "success", "message": "If that email is registered, a reset link has been sent."}
+
+
+@app.post("/reset-password")
+def reset_password(token: str = Form(...), new_password: str = Form(...)):
+    user = get_user_by_reset_token(token)
+    if not user:
+        raise HTTPException(status_code=400, detail="Invalid or expired reset link. Please request a new one.")
+
+    new_hash = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute('UPDATE users SET password_hash = ? WHERE id = ?', (new_hash, user['id']))
+    conn.commit()
+    conn.close()
+
+    clear_reset_token(user['id'])
     return {"status": "success"}

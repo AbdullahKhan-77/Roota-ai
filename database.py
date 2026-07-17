@@ -4,6 +4,8 @@ from datetime import datetime
 from pathlib import Path
 import secrets
 import bcrypt
+import secrets
+from datetime import datetime, timedelta
 
 DB_PATH = Path(__file__).parent / "debugai.db"
 
@@ -149,5 +151,68 @@ def get_user_incidents(user_id):
     rows = cursor.fetchall()
     conn.close()
     return [dict(row) for row in rows]
+
+def migrate_add_reset_token_columns():
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("PRAGMA table_info(users)")
+    columns = [row[1] for row in cursor.fetchall()]
+
+    if 'reset_token' not in columns:
+        cursor.execute('ALTER TABLE users ADD COLUMN reset_token TEXT')
+    if 'reset_token_expiry' not in columns:
+        cursor.execute('ALTER TABLE users ADD COLUMN reset_token_expiry TEXT')
+
+    conn.commit()
+    conn.close()
+    
+    
+def set_reset_token(email):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT id FROM users WHERE email = ?', (email,))
+    row = cursor.fetchone()
+    if not row:
+        conn.close()
+        return None
+
+    token = secrets.token_urlsafe(32)
+    expiry = (datetime.now() + timedelta(hours=1)).isoformat()
+
+    cursor.execute(
+        'UPDATE users SET reset_token = ?, reset_token_expiry = ? WHERE email = ?',
+        (token, expiry, email)
+    )
+    conn.commit()
+    conn.close()
+    return token
+
+
+def get_user_by_reset_token(token):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM users WHERE reset_token = ?', (token,))
+    row = cursor.fetchone()
+    conn.close()
+    if not row:
+        return None
+    user = dict(row)
+
+    if not user['reset_token_expiry'] or datetime.fromisoformat(user['reset_token_expiry']) < datetime.now():
+        return None
+
+    return user
+
+
+def clear_reset_token(user_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        'UPDATE users SET reset_token = NULL, reset_token_expiry = NULL WHERE id = ?',
+        (user_id,)
+    )
+    conn.commit()
+    conn.close()
+    
 if __name__ == '__main__':
     init_db()
