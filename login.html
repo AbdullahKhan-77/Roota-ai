@@ -5,25 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Roota — Sign In</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' fill='none'%3E%3Crect x='1' y='1' width='30' height='30' rx='7' stroke='%233B82F6' stroke-width='2.5' fill='%23090909'/%3E%3Ccircle cx='10' cy='16' r='2.5' fill='%233B82F6'/%3E%3Cpath d='M15 11.5L21.5 16L15 20.5' stroke='%233B82F6' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' fill='none'%3E%3Crect x='1' y='1' width='30' height='30' rx='7' stroke='%2334e28a' stroke-width='2.5' fill='%230a0c0b'/%3E%3Ccircle cx='10' cy='16' r='2.5' fill='%2334e28a'/%3E%3Cpath d='M15 11.5L21.5 16L15 20.5' stroke='%2334e28a' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         :root {
-            --bg: #09090B;
-            --surface: #0F1117;
-            --surface2: #1a1a2e;
-            --border: #27272A;
-            --blue: #3B82F6;
-            --blue-dim: #3B82F615;
-            --text: #F9FAFB;
-            --muted: #9CA3AF;
-            --muted2: #52525B;
+            --bg: #0a0c0b;
+            --surface: #121615;
+            --surface2: #101413;
+            --border: #1e2422;
+            --blue: #34e28a;
+            --blue-dim: #34e28a15;
+            --text: #e7ede8;
+            --muted: #adb8b0;
+            --muted2: #545e56;
         }
 
         html, body {
-            font-family: 'Space Grotesk', sans-serif;
+            font-family: 'Hanken Grotesk', sans-serif;
             background: var(--bg);
             color: var(--text);
             min-height: 100vh;
@@ -72,12 +72,12 @@
         .auth-card {
             width: 100%;
             max-width: 440px;
-            background: rgba(15, 17, 23, 0.85);
+            background: rgba(18, 22, 21, 0.85);
             border: 1px solid var(--border);
             border-radius: 16px;
             padding: 40px;
             backdrop-filter: blur(20px);
-            box-shadow: 0 0 60px rgba(59, 130, 246, 0.05);
+            box-shadow: 0 0 60px rgba(52, 226, 138, 0.05);
         }
 
         /* LOGO */
@@ -127,7 +127,7 @@
             border-bottom: 2px solid transparent;
             margin-bottom: -1px;
             transition: all 0.2s;
-            font-family: 'Space Grotesk', sans-serif;
+            font-family: 'Hanken Grotesk', sans-serif;
         }
 
         .tab.active {
@@ -157,7 +157,7 @@
             font-weight: 500;
             cursor: not-allowed;
             opacity: 0.5;
-            font-family: 'Space Grotesk', sans-serif;
+            font-family: 'Hanken Grotesk', sans-serif;
         }
 
         /* DIVIDER */
@@ -219,12 +219,12 @@
         input {
             width: 100%;
             padding: 11px 14px;
-            background: rgba(9, 9, 11, 0.8);
+            background: rgba(10, 12, 11, 0.8);
             border: 1px solid var(--border);
             border-radius: 8px;
             color: var(--text);
             font-size: 0.875rem;
-            font-family: 'Space Grotesk', sans-serif;
+            font-family: 'Hanken Grotesk', sans-serif;
             transition: border-color 0.2s;
             outline: none;
         }
@@ -253,12 +253,12 @@
             background: var(--blue);
             border: none;
             border-radius: 8px;
-            color: white;
+            color: #06110b;
             font-size: 0.9rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
-            font-family: 'Space Grotesk', sans-serif;
+            font-family: 'Hanken Grotesk', sans-serif;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -267,9 +267,9 @@
         }
 
         .submit-btn:hover {
-            background: #2563eb;
+            background: #2bc97a;
             transform: translateY(-1px);
-            box-shadow: 0 8px 20px -8px rgba(59,130,246,0.5);
+            box-shadow: 0 8px 20px -8px rgba(52,226,138,0.5);
         }
 
         .submit-btn:disabled {
@@ -280,11 +280,11 @@
 
         /* ERROR */
         .error-msg {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.3);
+            background: rgba(255, 100, 89, 0.1);
+            border: 1px solid rgba(255, 100, 89, 0.3);
             border-radius: 6px;
             padding: 10px 14px;
-            color: #fca5a5;
+            color: #ffb3ae;
             font-size: 0.825rem;
             margin-top: 14px;
             display: none;
@@ -336,9 +336,9 @@
         <!-- LOGO -->
         <div class="card-logo">
             <svg width="44" height="44" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="1" y="1" width="30" height="30" rx="7" stroke="#3B82F6" stroke-width="2.5" fill="rgba(59,130,246,0.08)"/>
-                <circle cx="10" cy="16" r="2.5" fill="#3B82F6"/>
-                <path d="M15 11.5L21.5 16L15 20.5" stroke="#3B82F6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <rect x="1" y="1" width="30" height="30" rx="7" stroke="#34e28a" stroke-width="2.5" fill="rgba(52,226,138,0.08)"/>
+                <circle cx="10" cy="16" r="2.5" fill="#34e28a"/>
+                <path d="M15 11.5L21.5 16L15 20.5" stroke="#34e28a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
         </div>
 
@@ -438,9 +438,10 @@
         Send Reset Link →
     </button>
     <div class="error-msg" id="forgotError"></div>
-    <div class="success-msg" id="forgotSuccess" style="display:none; color: var(--green, #22c55e); font-size: 0.85rem; margin-top: 8px;"></div>
+    <div class="success-msg" id="forgotSuccess" style="display:none; color: var(--green, #34e28a); font-size: 0.85rem; margin-top: 8px;"></div>
     <a href="#" class="forgot-link" onclick="backToSignin(); return false;" style="display:block; margin-top: 14px; text-align:center;">← Back to sign in</a>
 </div>
+
     </div>
 </div>
 
@@ -688,7 +689,7 @@ void main() {
     float dist = distance(uv, mouse);
     float glow = smoothstep(0.3, 0.0, dist) * 0.15;
     vec3 grid_color = vec3(0.125, 0.125, 0.125);
-    vec3 accent_color = vec3(0.23, 0.51, 0.96);
+    vec3 accent_color = vec3(0.20, 0.89, 0.54);
     float pulse = sin(u_time * 0.5 + uv.x * 10.0 + uv.y * 10.0) * 0.5 + 0.5;
     float pattern = smoothstep(0.48, 0.5, fract(uv.x * 5.0 + u_time * 0.1)) *
                     smoothstep(0.48, 0.5, fract(uv.y * 5.0 - u_time * 0.05));
@@ -702,9 +703,9 @@ void main() {
         p.x += 0.3 / i * sin(i * 3.0 * p.y + t + cos((t / (i * 2.0)) + i));
         p.y += 0.3 / i * cos(i * 3.0 * p.x + t + sin((t / (i * 2.0)) + i));
     }
-    vec3 color_obsidian = vec3(0.02, 0.02, 0.03);
-    vec3 color_cobalt = vec3(0.05, 0.2, 0.5);
-    vec3 color_accent = vec3(0.1, 0.4, 0.9);
+    vec3 color_obsidian = vec3(0.02, 0.03, 0.02);
+    vec3 color_cobalt = vec3(0.04, 0.24, 0.13);
+    vec3 color_accent = vec3(0.12, 0.62, 0.36);
     float brightness = 0.5 * sin(p.x + p.y) + 0.5;
     vec3 fluid_layer = mix(color_obsidian, color_cobalt, brightness * 0.28);
     fluid_layer += color_accent * (0.022 / length(p));

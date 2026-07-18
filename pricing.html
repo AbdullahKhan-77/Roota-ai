@@ -1,912 +1,254 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Roota — Pricing</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' fill='none'%3E%3Crect x='1' y='1' width='30' height='30' rx='7' stroke='%233B82F6' stroke-width='2.5' fill='%23090909'/%3E%3Ccircle cx='10' cy='16' r='2.5' fill='%233B82F6'/%3E%3Cpath d='M15 11.5L21.5 16L15 20.5' stroke='%233B82F6' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-
-        :root {
-            --bg: #09090B;
-            --surface: #0F1117;
-            --surface2: #1F2937;
-            --border: #27272A;
-            --blue: #3B82F6;
-            --blue-dim: #3B82F615;
-            --text: #F9FAFB;
-            --muted: #9CA3AF;
-            --muted2: #52525B;
-            --green: #10B981;
-            --amber: #F59E0B;
-        }
-
-        html { scroll-behavior: smooth; }
-
-        body {
-            font-family: 'Space Grotesk', sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            overflow-x: hidden;
-            min-height: 100vh;
-        }
-
-        /* SHADER */
-        #shader-canvas {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            z-index: 0;
-            pointer-events: none;
-        }
-
-        /* NAV */
-        nav {
-            position: fixed;
-            top: 0; left: 0; right: 0;
-            z-index: 100;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 18px 48px;
-            background: rgba(9, 9, 9, 0.85);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--border);
-        }
-
-        .nav-logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: var(--text);
-            text-decoration: none;
-        }
-
-        .logo-icon { width: 32px; height: 32px; flex-shrink: 0; }
-
-        .nav-links {
-            display: flex;
-            gap: 32px;
-            list-style: none;
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-
-        .nav-links a {
-            color: var(--muted);
-            text-decoration: none;
-            font-size: 0.875rem;
-            font-weight: 500;
-            transition: color 0.2s;
-            position: relative;
-        }
-
-        .nav-links a:hover { color: var(--text); }
-        .nav-links a.active { color: var(--blue); }
-
-        .nav-links a::after {
-            content: '';
-            position: absolute;
-            left: 0; bottom: -4px;
-            width: 0; height: 1px;
-            background: var(--blue);
-            transition: width 0.25s ease;
-        }
-
-        .nav-links a:hover::after,
-        .nav-links a.active::after { width: 100%; }
-
-        .nav-actions { display: flex; gap: 10px; align-items: center; }
-
-        .btn-ghost {
-            padding: 8px 18px;
-            background: transparent;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            color: var(--muted);
-            font-size: 0.875rem;
-            font-weight: 500;
-            cursor: pointer;
-            text-decoration: none;
-            transition: all 0.2s;
-            font-family: 'Space Grotesk', sans-serif;
-        }
-
-        .btn-ghost:hover { color: var(--text); border-color: #444; transform: translateY(-2px); }
-
-        .btn-primary {
-            padding: 8px 18px;
-            background: var(--blue);
-            border: none;
-            border-radius: 6px;
-            color: white;
-            font-size: 0.875rem;
-            font-weight: 600;
-            cursor: pointer;
-            text-decoration: none;
-            transition: all 0.2s;
-            font-family: 'Space Grotesk', sans-serif;
-        }
-
-        .btn-primary:hover { background: #2563eb; transform: translateY(-2px); }
-
-        /* PAGE */
-        .page {
-            position: relative;
-            z-index: 1;
-            padding: 140px 48px 100px;
-            max-width: 1100px;
-            margin: 0 auto;
-        }
-
-        /* HERO */
-        .pricing-hero {
-            text-align: center;
-            margin-bottom: 80px;
-        }
-
-        .eyebrow {
-            font-size: 0.72rem;
-            color: var(--muted2);
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
-            margin-bottom: 16px;
-        }
-
-        .pricing-hero h1 {
-            font-size: clamp(2.5rem, 5vw, 4rem);
-            font-weight: 800;
-            letter-spacing: -0.04em;
-            line-height: 1.05;
-            margin-bottom: 16px;
-        }
-
-        .pricing-hero p {
-            font-size: 1rem;
-            color: var(--muted);
-            max-width: 440px;
-            margin: 0 auto 32px;
-            line-height: 1.7;
-        }
-
-        .beta-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 6px 16px;
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            border-radius: 100px;
-            font-size: 0.78rem;
-            font-weight: 600;
-            color: #6ee7b7;
-            letter-spacing: 0.05em;
-        }
-
-        .beta-badge::before {
-            content: '';
-            width: 6px;
-            height: 6px;
-            background: #10B981;
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
-        }
-
-        /* PRICING GRID */
-        .pricing-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1px;
-            background: var(--border);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            overflow: hidden;
-            margin-bottom: 80px;
-        }
-
-        .plan-card {
-            background: var(--surface);
-            padding: 40px 36px;
-            position: relative;
-            transition: background 0.2s;
-        }
-
-        .plan-card.featured {
-            background: #0d1929;
-            border-left: 1px solid rgba(59, 130, 246, 0.3);
-            border-right: 1px solid rgba(59, 130, 246, 0.3);
-        }
-
-        .plan-card:hover { background: #111827; }
-        .plan-card.featured:hover { background: #0f1e35; }
-
-        .plan-badge {
-            display: inline-flex;
-            padding: 3px 10px;
-            border-radius: 100px;
-            font-size: 0.68rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            margin-bottom: 20px;
-        }
-
-        .badge-free { background: rgba(16,185,129,0.1); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.3); }
-        .badge-pro { background: var(--blue-dim); color: #93c5fd; border: 1px solid rgba(59,130,246,0.3); }
-        .badge-enterprise { background: rgba(245,158,11,0.1); color: #fcd34d; border: 1px solid rgba(245,158,11,0.3); }
-
-        .plan-name {
-            font-size: 1.1rem;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-
-        .plan-desc {
-            font-size: 0.825rem;
-            color: var(--muted);
-            line-height: 1.6;
-            margin-bottom: 28px;
-            min-height: 48px;
-        }
-
-        .plan-price {
-            margin-bottom: 28px;
-        }
-
-        .price-amount {
-            font-size: 2.8rem;
-            font-weight: 800;
-            letter-spacing: -0.04em;
-            line-height: 1;
-        }
-
-        .price-period {
-            font-size: 0.875rem;
-            color: var(--muted);
-            margin-left: 4px;
-        }
-
-        .price-coming {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: var(--muted);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .coming-tag {
-            font-size: 0.68rem;
-            background: rgba(245,158,11,0.1);
-            color: #fcd34d;
-            border: 1px solid rgba(245,158,11,0.3);
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-        }
-
-        .plan-cta {
-            display: block;
-            width: 100%;
-            padding: 11px;
-            border-radius: 8px;
-            font-size: 0.875rem;
-            font-weight: 600;
-            text-align: center;
-            cursor: pointer;
-            text-decoration: none;
-            transition: all 0.2s;
-            font-family: 'Space Grotesk', sans-serif;
-            margin-bottom: 28px;
-            border: none;
-        }
-
-        .cta-active {
-            background: var(--blue);
-            color: white;
-        }
-
-        .cta-active:hover {
-            background: #2563eb;
-            transform: translateY(-1px);
-            box-shadow: 0 8px 20px -8px rgba(59,130,246,0.5);
-        }
-
-        .cta-inactive {
-            background: transparent;
-            color: var(--muted);
-            border: 1px solid var(--border) !important;
-            cursor: not-allowed;
-            opacity: 0.6;
-        }
-
-        .plan-divider {
-            height: 1px;
-            background: var(--border);
-            margin-bottom: 24px;
-        }
-
-        .features-list {
-            list-style: none;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .feature-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-            font-size: 0.85rem;
-            color: var(--muted);
-            line-height: 1.5;
-        }
-
-        .feature-item.included { color: var(--text); }
-        .feature-item.excluded { color: var(--muted2); }
-
-        .feature-check {
-            width: 16px;
-            height: 16px;
-            flex-shrink: 0;
-            margin-top: 1px;
-        }
-
-        /* FEATURE COMPARISON */
-        .comparison {
-            margin-bottom: 80px;
-        }
-
-        .comparison h2 {
-            font-size: 1.5rem;
-            font-weight: 800;
-            letter-spacing: -0.02em;
-            margin-bottom: 32px;
-            text-align: center;
-        }
-
-        .comparison-table {
-            width: 100%;
-            border-collapse: collapse;
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            overflow: hidden;
-        }
-
-        .comparison-table th {
-            padding: 16px 20px;
-            background: var(--surface2);
-            font-size: 0.82rem;
-            font-weight: 600;
-            text-align: center;
-            color: var(--muted);
-            border-bottom: 1px solid var(--border);
-        }
-
-        .comparison-table th:first-child { text-align: left; }
-
-        .comparison-table td {
-            padding: 14px 20px;
-            border-bottom: 1px solid var(--border);
-            font-size: 0.85rem;
-            color: var(--muted);
-            text-align: center;
-            background: var(--surface);
-        }
-
-        .comparison-table td:first-child {
-            text-align: left;
-            color: var(--text);
-            font-weight: 500;
-        }
-
-        .comparison-table tr:last-child td { border-bottom: none; }
-        .comparison-table tr:hover td { background: rgba(255,255,255,0.02); }
-
-        .check-yes { color: #10B981; font-size: 1rem; }
-        .check-no { color: var(--muted2); font-size: 1rem; }
-        .check-soon {
-            font-size: 0.68rem;
-            background: rgba(245,158,11,0.1);
-            color: #fcd34d;
-            border: 1px solid rgba(245,158,11,0.3);
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-weight: 600;
-        }
-
-        /* FAQ */
-        .faq {
-            max-width: 680px;
-            margin: 0 auto 80px;
-        }
-
-        .faq h2 {
-            font-size: 1.5rem;
-            font-weight: 800;
-            letter-spacing: -0.02em;
-            margin-bottom: 32px;
-            text-align: center;
-        }
-
-        .faq-item {
-            border-bottom: 1px solid var(--border);
-            padding: 20px 0;
-        }
-
-        .faq-item:last-child { border-bottom: none; }
-
-        .faq-q {
-            font-size: 0.95rem;
-            font-weight: 600;
-            margin-bottom: 10px;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .faq-a {
-            font-size: 0.875rem;
-            color: var(--muted);
-            line-height: 1.7;
-        }
-
-        /* CTA */
-        .bottom-cta {
-            text-align: center;
-            padding: 80px 48px;
-            background: rgba(15,17,23,0.6);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            backdrop-filter: blur(8px);
-        }
-
-        .bottom-cta h2 {
-            font-size: clamp(1.8rem, 3vw, 2.5rem);
-            font-weight: 800;
-            letter-spacing: -0.03em;
-            margin-bottom: 12px;
-        }
-
-        .bottom-cta p {
-            color: var(--muted);
-            font-size: 0.95rem;
-            margin-bottom: 32px;
-        }
-
-        /* FOOTER */
-        footer {
-            position: relative;
-            z-index: 1;
-            border-top: 1px solid var(--border);
-            padding: 40px 48px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        footer p { color: var(--muted2); font-size: 0.8rem; }
-
-        .footer-links {
-            display: flex;
-            gap: 24px;
-            list-style: none;
-        }
-
-        .footer-links a {
-            color: var(--muted2);
-            text-decoration: none;
-            font-size: 0.8rem;
-            transition: color 0.2s;
-        }
-
-        .footer-links a:hover { color: var(--text); }
-
-        /* ANIMATIONS */
-        .fade-up {
-            opacity: 0;
-            transform: translateY(20px);
-            transition: opacity 0.6s ease, transform 0.6s ease;
-        }
-
-        .fade-up.visible { opacity: 1; transform: translateY(0); }
-        .fade-up:nth-child(2) { transition-delay: 0.1s; }
-        .fade-up:nth-child(3) { transition-delay: 0.2s; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Roota — Pricing</title>
+  <meta name="description" content="Simple, honest pricing. Free forever for individual developers. Team and Enterprise plans coming soon.">
+  <meta name="theme-color" content="#0a0c0b">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='1' y='1' width='30' height='30' rx='8' fill='%230e1110' stroke='%2334e28a' stroke-width='2'/%3E%3Ccircle cx='10' cy='16' r='2.6' fill='%237defb6'/%3E%3Cpath d='M14.5 11.5L21 16l-6.5 4.5' stroke='%2334e28a' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/roota.css">
+  <style>
+    .price-hero { text-align: center; padding: calc(var(--nav-h) + 60px) var(--pad-x) 20px; max-width: 720px; margin: 0 auto; }
+    .price-hero h1 { font-size: clamp(2.4rem, 5vw, 3.6rem); margin: 16px 0 14px; }
+    .price-hero p { color: var(--muted); font-size: 1.05rem; }
+    .beta-badge {
+      display: inline-flex; align-items: center; gap: 8px; margin-top: 22px;
+      font-size: 0.8rem; color: var(--iris-2);
+      border: 1px solid rgba(52,226,138,0.35); background: rgba(52,226,138,0.1);
+      padding: 7px 15px; border-radius: var(--r-pill);
+    }
+
+    .plans { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; align-items: start; }
+    @media (max-width: 940px) { .plans { grid-template-columns: 1fr; max-width: 440px; margin: 0 auto; } }
+
+    .plan { display: flex; flex-direction: column; }
+    .plan.featured {
+      border-color: rgba(52,226,138,0.5);
+      background: linear-gradient(180deg, rgba(52,226,138,0.08), var(--surface));
+      box-shadow: var(--shadow-brand);
+    }
+    .plan-badge { align-self: flex-start; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 4px 10px; border-radius: var(--r-pill); margin-bottom: 16px; }
+    .b-free { color: var(--ok); background: rgba(52,226,138,0.1); border: 1px solid rgba(52,226,138,0.3); }
+    .b-pro { color: var(--iris-2); background: rgba(52,226,138,0.12); border: 1px solid rgba(52,226,138,0.35); }
+    .b-ent { color: var(--warn); background: rgba(242,180,92,0.1); border: 1px solid rgba(242,180,92,0.3); }
+    .plan-name { font-size: 1.35rem; font-weight: 600; margin-bottom: 8px; }
+    .plan-desc { font-size: 0.88rem; color: var(--muted); line-height: 1.6; min-height: 60px; }
+    .plan-price { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; margin: 18px 0; min-height: 48px; }
+    .price-amount { font-size: 2.6rem; font-weight: 700; letter-spacing: -0.03em; }
+    .price-period { color: var(--muted); font-size: 0.9rem; }
+    .coming-tag { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--info); background: rgba(108,178,255,0.12); border: 1px solid rgba(108,178,255,0.3); padding: 2px 7px; border-radius: var(--r-pill); }
+    .plan hr { border: 0; height: 1px; background: var(--line); margin: 6px 0 18px; }
+    .plan .btn { width: 100%; }
+    .plan .btn.disabled { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
+
+    .feats { list-style: none; margin-top: 20px; display: flex; flex-direction: column; gap: 12px; }
+    .feat { display: flex; align-items: flex-start; gap: 10px; font-size: 0.86rem; }
+    .feat.yes { color: var(--text-2); }
+    .feat.no { color: var(--faint); }
+    .feat svg { width: 16px; height: 16px; flex-shrink: 0; margin-top: 2px; }
+    .feat.yes svg { color: var(--ok); }
+    .feat.no svg { color: var(--faint); }
+
+    /* Comparison */
+    .cmp-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--r-lg); }
+    table.cmp { width: 100%; border-collapse: collapse; min-width: 560px; }
+    table.cmp th, table.cmp td { padding: 14px 18px; text-align: left; font-size: 0.88rem; border-bottom: 1px solid var(--line); }
+    table.cmp thead th { color: var(--text); font-weight: 600; background: var(--surface-2); position: sticky; top: 0; }
+    table.cmp th:not(:first-child), table.cmp td:not(:first-child) { text-align: center; }
+    table.cmp td:first-child { color: var(--text-2); }
+    table.cmp tbody tr:last-child td { border-bottom: 0; }
+    .yes-c { color: var(--ok); font-weight: 700; }
+    .no-c { color: var(--faint); }
+    .soon-c { font-size: 0.7rem; color: var(--info); background: rgba(108,178,255,0.12); border: 1px solid rgba(108,178,255,0.3); padding: 2px 8px; border-radius: var(--r-pill); }
+
+    /* FAQ */
+    .faq-list { max-width: 760px; margin: 0 auto; }
+    details.faq-item { border-bottom: 1px solid var(--line); }
+    details.faq-item summary {
+      display: flex; justify-content: space-between; align-items: center; gap: 16px;
+      padding: 20px 4px; cursor: pointer; font-size: 1rem; font-weight: 500; color: var(--text);
+      list-style: none;
+    }
+    details.faq-item summary::-webkit-details-marker { display: none; }
+    details.faq-item summary .ico { flex-shrink: 0; width: 22px; height: 22px; display: grid; place-items: center; border: 1px solid var(--line-2); border-radius: 50%; color: var(--muted); transition: transform 0.25s var(--ease), color 0.25s var(--ease); font-size: 1rem; line-height: 1; }
+    details.faq-item[open] summary .ico { transform: rotate(45deg); color: var(--iris-2); border-color: rgba(52,226,138,0.5); }
+    details.faq-item .faq-a { padding: 0 4px 22px; color: var(--muted); font-size: 0.92rem; line-height: 1.7; max-width: 66ch; }
+
+    .bottom-cta { text-align: center; }
+  </style>
 </head>
 <body>
+  <a href="#main" class="skip-link">Skip to content</a>
+  <div class="backdrop" aria-hidden="true"><div class="aurora a1"></div><div class="aurora a2"></div></div>
+  <div class="scrim" aria-hidden="true"></div>
 
-<canvas id="shader-canvas"></canvas>
-
-<!-- NAV -->
-<nav>
-    <a href="/home" class="nav-logo">
-        <svg class="logo-icon" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="1" y="1" width="30" height="30" rx="7" stroke="#3B82F6" stroke-width="2.5" fill="none"/>
-            <circle cx="10" cy="16" r="2.5" fill="#3B82F6"/>
-            <path d="M15 11.5L21.5 16L15 20.5" stroke="#3B82F6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        Roota
+  <header class="nav">
+    <a href="/home" class="brand" aria-label="Roota home">
+      <svg class="logo" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="1" y="1" width="30" height="30" rx="8" fill="#0e1110" stroke="#34e28a" stroke-width="2"/><circle cx="10" cy="16" r="2.6" fill="#7defb6"/><path d="M14.5 11.5L21 16l-6.5 4.5" stroke="#34e28a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>Roo<span class="lw-2">ta</span></span><span class="beta">Beta</span>
     </a>
-
-    <ul class="nav-links">
+    <button class="menu-btn" aria-label="Toggle menu" aria-expanded="false" aria-controls="navLinks"><span></span><span></span><span></span></button>
+    <nav aria-label="Primary">
+      <ul class="nav-links" id="navLinks">
         <li><a href="/home#features">Features</a></li>
         <li><a href="/docs-page">Docs</a></li>
-        <li><a href="/pricing" class="active">Pricing</a></li>
+        <li><a href="/pricing">Pricing</a></li>
         <li><a href="/changelog">Changelog</a></li>
-    </ul>
-
+      </ul>
+    </nav>
     <div class="nav-actions">
-        <a href="/login" class="btn-ghost">Sign In</a>
-        <a href="/login" class="btn-primary">Start Free</a>
+      <a href="/login" class="btn btn-ghost hide-mobile">Sign in</a>
+      <a href="/login" class="btn btn-primary">Start free <span class="arw">→</span></a>
     </div>
-</nav>
+  </header>
 
-<!-- PAGE -->
-<div class="page">
+  <main id="main">
+    <section class="price-hero">
+      <span class="eyebrow" style="justify-content:center;">Pricing</span>
+      <h1 class="split">Simple, honest pricing.</h1>
+      <p class="reveal" style="--d:.1s">Start free. Upgrade when you're ready. No surprises, no hidden fees.</p>
+      <div class="reveal" style="--d:.16s"><span class="beta-badge"><span class="dot pulse"></span> Free during beta — paid plans coming soon</span></div>
+    </section>
 
-    <!-- HERO -->
-    <div class="pricing-hero">
-        <p class="eyebrow">Pricing</p>
-        <h1>Simple, honest pricing.</h1>
-        <p>Start free. Upgrade when you're ready. No surprises, no hidden fees.</p>
-        <div class="beta-badge">Free during beta — paid plans coming soon</div>
-    </div>
+    <section class="section" style="padding-top:40px;">
+      <div class="plans">
+        <!-- Developer -->
+        <article class="card plan spotlight reveal">
+          <span class="plan-badge b-free">Free</span>
+          <h2 class="plan-name">Developer</h2>
+          <p class="plan-desc">Everything you need to get started. Free forever for individual developers.</p>
+          <div class="plan-price"><span class="price-amount">$0</span><span class="price-period">/ month</span></div>
+          <a href="/login" class="btn btn-primary">Get started free</a>
+          <hr>
+          <ul class="feats">
+            <li class="feat yes"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="7"/><path d="M5 8l2 2 4-4"/></svg>Unlimited log analyses</li>
+            <li class="feat yes"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="7"/><path d="M5 8l2 2 4-4"/></svg>GitHub source code integration</li>
+            <li class="feat yes"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="7"/><path d="M5 8l2 2 4-4"/></svg>Python auto-capture SDK</li>
+            <li class="feat yes"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="7"/><path d="M5 8l2 2 4-4"/></svg>C++ crash handler</li>
+            <li class="feat yes"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="7"/><path d="M5 8l2 2 4-4"/></svg>Any log format (AI fallback)</li>
+            <li class="feat yes"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="7"/><path d="M5 8l2 2 4-4"/></svg>Incident history storage</li>
+            <li class="feat no"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="7"/><path d="M5.5 10.5l5-5M10.5 10.5l-5-5"/></svg>Team workspaces</li>
+            <li class="feat no"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="7"/><path d="M5.5 10.5l5-5M10.5 10.5l-5-5"/></svg>Priority support</li>
+          </ul>
+        </article>
 
-    <!-- PLANS -->
-    <div class="pricing-grid">
+        <!-- Team (featured) -->
+        <article class="card plan featured spotlight reveal" style="--d:.06s">
+          <span class="plan-badge b-pro">Pro · Most popular</span>
+          <h2 class="plan-name">Team</h2>
+          <p class="plan-desc">For engineering teams who want shared incident history and deeper integrations.</p>
+          <div class="plan-price"><span class="price-amount">$29</span><span class="price-period">/ seat / mo</span><span class="coming-tag">Coming soon</span></div>
+          <button class="btn btn-secondary disabled" disabled>Notify me</button>
+          <hr>
+          <ul class="feats">
+            <li class="feat yes"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="7"/><path d="M5 8l2 2 4-4"/></svg>Everything in Developer</li>
+            <li class="feat yes"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="7"/><path d="M5 8l2 2 4-4"/></svg>Team workspaces (up to 10 seats)</li>
+            <li class="feat yes"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="7"/><path d="M5 8l2 2 4-4"/></svg>Shared incident history</li>
+            <li class="feat yes"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="7"/><path d="M5 8l2 2 4-4"/></svg>Slack bot integration</li>
+            <li class="feat yes"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="7"/><path d="M5 8l2 2 4-4"/></svg>Sentry webhook integration</li>
+            <li class="feat yes"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="7"/><path d="M5 8l2 2 4-4"/></svg>Priority email support</li>
+            <li class="feat no"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="7"/><path d="M5.5 10.5l5-5M10.5 10.5l-5-5"/></svg>On-premise deployment</li>
+            <li class="feat no"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="7"/><path d="M5.5 10.5l5-5M10.5 10.5l-5-5"/></svg>Custom AI model selection</li>
+          </ul>
+        </article>
 
-        <!-- FREE -->
-        <div class="plan-card fade-up">
-            <div class="plan-badge badge-free">Free</div>
-            <div class="plan-name">Developer</div>
-            <div class="plan-desc">Everything you need to get started. Free forever for individual developers.</div>
-            <div class="plan-price">
-                <span class="price-amount">$0</span>
-                <span class="price-period">/ month</span>
-            </div>
-            <a href="/login" class="plan-cta cta-active">Get Started Free</a>
-            <div class="plan-divider"></div>
-            <ul class="features-list">
-                <li class="feature-item included">
-                    <svg class="feature-check" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#10B981" stroke-width="1.5"/><path d="M5 8l2 2 4-4" stroke="#10B981" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    Unlimited log analyses
-                </li>
-                <li class="feature-item included">
-                    <svg class="feature-check" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#10B981" stroke-width="1.5"/><path d="M5 8l2 2 4-4" stroke="#10B981" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    GitHub source code integration
-                </li>
-                <li class="feature-item included">
-                    <svg class="feature-check" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#10B981" stroke-width="1.5"/><path d="M5 8l2 2 4-4" stroke="#10B981" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    Python auto-capture SDK
-                </li>
-                <li class="feature-item included">
-                    <svg class="feature-check" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#10B981" stroke-width="1.5"/><path d="M5 8l2 2 4-4" stroke="#10B981" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    C++ crash handler
-                </li>
-                <li class="feature-item included">
-                    <svg class="feature-check" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#10B981" stroke-width="1.5"/><path d="M5 8l2 2 4-4" stroke="#10B981" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    Any log format (AI fallback)
-                </li>
-                <li class="feature-item included">
-                    <svg class="feature-check" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#10B981" stroke-width="1.5"/><path d="M5 8l2 2 4-4" stroke="#10B981" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    Incident history storage
-                </li>
-                <li class="feature-item excluded">
-                    <svg class="feature-check" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#52525B" stroke-width="1.5"/><path d="M5.5 10.5l5-5M10.5 10.5l-5-5" stroke="#52525B" stroke-width="1.5" stroke-linecap="round"/></svg>
-                    Team workspaces
-                </li>
-                <li class="feature-item excluded">
-                    <svg class="feature-check" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#52525B" stroke-width="1.5"/><path d="M5.5 10.5l5-5M10.5 10.5l-5-5" stroke="#52525B" stroke-width="1.5" stroke-linecap="round"/></svg>
-                    Priority support
-                </li>
-            </ul>
-        </div>
+        <!-- Enterprise -->
+        <article class="card plan spotlight reveal" style="--d:.12s">
+          <span class="plan-badge b-ent">Enterprise</span>
+          <h2 class="plan-name">Enterprise</h2>
+          <p class="plan-desc">For companies with security requirements, large teams, and custom deployment needs.</p>
+          <div class="plan-price"><span class="price-amount">Custom</span><span class="coming-tag">Coming soon</span></div>
+          <a href="mailto:abdkhan1076@gmail.com" class="btn btn-secondary">Contact sales</a>
+          <hr>
+          <ul class="feats">
+            <li class="feat yes"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="7"/><path d="M5 8l2 2 4-4"/></svg>Everything in Team</li>
+            <li class="feat yes"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="7"/><path d="M5 8l2 2 4-4"/></svg>Unlimited seats</li>
+            <li class="feat yes"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="7"/><path d="M5 8l2 2 4-4"/></svg>On-premise deployment</li>
+            <li class="feat yes"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="7"/><path d="M5 8l2 2 4-4"/></svg>Custom AI model selection</li>
+            <li class="feat yes"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="7"/><path d="M5 8l2 2 4-4"/></svg>SSO / SAML authentication</li>
+            <li class="feat yes"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="7"/><path d="M5 8l2 2 4-4"/></svg>99.9% SLA guarantee</li>
+            <li class="feat yes"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="7"/><path d="M5 8l2 2 4-4"/></svg>Dedicated CSM</li>
+            <li class="feat yes"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="7"/><path d="M5 8l2 2 4-4"/></svg>SOC 2 Type II compliance</li>
+          </ul>
+        </article>
+      </div>
+    </section>
 
-        <!-- PRO -->
-        <div class="plan-card featured fade-up">
-            <div class="plan-badge badge-pro">Pro</div>
-            <div class="plan-name">Team</div>
-            <div class="plan-desc">For engineering teams who want shared incident history and deeper integrations.</div>
-            <div class="plan-price">
-                <div class="price-coming">
-                    $29 <span style="font-size:0.875rem; color:var(--muted);">/ seat / mo</span>
-                    <span class="coming-tag">Coming Soon</span>
-                </div>
-            </div>
-            <button class="plan-cta cta-inactive" disabled>Notify Me</button>
-            <div class="plan-divider"></div>
-            <ul class="features-list">
-                <li class="feature-item included">
-                    <svg class="feature-check" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#10B981" stroke-width="1.5"/><path d="M5 8l2 2 4-4" stroke="#10B981" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    Everything in Developer
-                </li>
-                <li class="feature-item included">
-                    <svg class="feature-check" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#10B981" stroke-width="1.5"/><path d="M5 8l2 2 4-4" stroke="#10B981" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    Team workspaces (up to 10 seats)
-                </li>
-                <li class="feature-item included">
-                    <svg class="feature-check" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#10B981" stroke-width="1.5"/><path d="M5 8l2 2 4-4" stroke="#10B981" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    Shared incident history
-                </li>
-                <li class="feature-item included">
-                    <svg class="feature-check" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#10B981" stroke-width="1.5"/><path d="M5 8l2 2 4-4" stroke="#10B981" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    Slack bot integration
-                </li>
-                <li class="feature-item included">
-                    <svg class="feature-check" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#10B981" stroke-width="1.5"/><path d="M5 8l2 2 4-4" stroke="#10B981" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    Sentry webhook integration
-                </li>
-                <li class="feature-item included">
-                    <svg class="feature-check" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#10B981" stroke-width="1.5"/><path d="M5 8l2 2 4-4" stroke="#10B981" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    Priority email support
-                </li>
-                <li class="feature-item excluded">
-                    <svg class="feature-check" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#52525B" stroke-width="1.5"/><path d="M5.5 10.5l5-5M10.5 10.5l-5-5" stroke="#52525B" stroke-width="1.5" stroke-linecap="round"/></svg>
-                    On-premise deployment
-                </li>
-                <li class="feature-item excluded">
-                    <svg class="feature-check" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#52525B" stroke-width="1.5"/><path d="M5.5 10.5l5-5M10.5 10.5l-5-5" stroke="#52525B" stroke-width="1.5" stroke-linecap="round"/></svg>
-                    Custom AI model selection
-                </li>
-            </ul>
-        </div>
-
-        <!-- ENTERPRISE -->
-        <div class="plan-card fade-up">
-            <div class="plan-badge badge-enterprise">Enterprise</div>
-            <div class="plan-name">Enterprise</div>
-            <div class="plan-desc">For companies with security requirements, large teams, and custom deployment needs.</div>
-            <div class="plan-price">
-                <div class="price-coming">
-                    Custom <span class="coming-tag">Coming Soon</span>
-                </div>
-            </div>
-           <a href="mailto:abdkhan1076@gmail.com" class="plan-cta cta-inactive" style="pointer-events:all; cursor:pointer; opacity:1; border:1px solid var(--border); color:var(--muted);">Contact Sales</a>
-            <div class="plan-divider"></div>
-            <ul class="features-list">
-                <li class="feature-item included">
-                    <svg class="feature-check" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#10B981" stroke-width="1.5"/><path d="M5 8l2 2 4-4" stroke="#10B981" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    Everything in Team
-                </li>
-                <li class="feature-item included">
-                    <svg class="feature-check" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#10B981" stroke-width="1.5"/><path d="M5 8l2 2 4-4" stroke="#10B981" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    Unlimited seats
-                </li>
-                <li class="feature-item included">
-                    <svg class="feature-check" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#10B981" stroke-width="1.5"/><path d="M5 8l2 2 4-4" stroke="#10B981" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    On-premise deployment
-                </li>
-                <li class="feature-item included">
-                    <svg class="feature-check" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#10B981" stroke-width="1.5"/><path d="M5 8l2 2 4-4" stroke="#10B981" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    Custom AI model selection
-                </li>
-                <li class="feature-item included">
-                    <svg class="feature-check" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#10B981" stroke-width="1.5"/><path d="M5 8l2 2 4-4" stroke="#10B981" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    SSO / SAML authentication
-                </li>
-                <li class="feature-item included">
-                    <svg class="feature-check" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#10B981" stroke-width="1.5"/><path d="M5 8l2 2 4-4" stroke="#10B981" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    99.9% SLA guarantee
-                </li>
-                <li class="feature-item included">
-                    <svg class="feature-check" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#10B981" stroke-width="1.5"/><path d="M5 8l2 2 4-4" stroke="#10B981" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    Dedicated CSM
-                </li>
-                <li class="feature-item included">
-                    <svg class="feature-check" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#10B981" stroke-width="1.5"/><path d="M5 8l2 2 4-4" stroke="#10B981" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    SOC 2 Type II compliance
-                </li>
-            </ul>
-        </div>
-    </div>
-
-    <!-- COMPARISON TABLE -->
-    <div class="comparison fade-up">
-        <h2>Compare plans</h2>
-        <table class="comparison-table">
-            <thead>
-                <tr>
-                    <th>Feature</th>
-                    <th>Developer</th>
-                    <th>Team</th>
-                    <th>Enterprise</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>Log analyses</td>
-                    <td>Unlimited</td>
-                    <td>Unlimited</td>
-                    <td>Unlimited</td>
-                </tr>
-                <tr>
-                    <td>GitHub integration</td>
-                    <td><span class="check-yes">✓</span></td>
-                    <td><span class="check-yes">✓</span></td>
-                    <td><span class="check-yes">✓</span></td>
-                </tr>
-                <tr>
-                    <td>C++ crash analysis</td>
-                    <td><span class="check-yes">✓</span></td>
-                    <td><span class="check-yes">✓</span></td>
-                    <td><span class="check-yes">✓</span></td>
-                </tr>
-                <tr>
-                    <td>Python SDK</td>
-                    <td><span class="check-yes">✓</span></td>
-                    <td><span class="check-yes">✓</span></td>
-                    <td><span class="check-yes">✓</span></td>
-                </tr>
-                <tr>
-                    <td>Team workspaces</td>
-                    <td><span class="check-no">—</span></td>
-                    <td><span class="check-soon">Soon</span></td>
-                    <td><span class="check-soon">Soon</span></td>
-                </tr>
-                <tr>
-                    <td>Slack integration</td>
-                    <td><span class="check-no">—</span></td>
-                    <td><span class="check-soon">Soon</span></td>
-                    <td><span class="check-soon">Soon</span></td>
-                </tr>
-                <tr>
-                    <td>Sentry webhook</td>
-                    <td><span class="check-no">—</span></td>
-                    <td><span class="check-soon">Soon</span></td>
-                    <td><span class="check-soon">Soon</span></td>
-                </tr>
-                <tr>
-                    <td>On-premise deployment</td>
-                    <td><span class="check-no">—</span></td>
-                    <td><span class="check-no">—</span></td>
-                    <td><span class="check-soon">Soon</span></td>
-                </tr>
-                <tr>
-                    <td>Custom AI model</td>
-                    <td><span class="check-no">—</span></td>
-                    <td><span class="check-no">—</span></td>
-                    <td><span class="check-soon">Soon</span></td>
-                </tr>
-                <tr>
-                    <td>SSO / SAML</td>
-                    <td><span class="check-no">—</span></td>
-                    <td><span class="check-no">—</span></td>
-                    <td><span class="check-soon">Soon</span></td>
-                </tr>
-                <tr>
-                    <td>SLA guarantee</td>
-                    <td><span class="check-no">—</span></td>
-                    <td><span class="check-no">—</span></td>
-                    <td><span class="check-soon">Soon</span></td>
-                </tr>
-            </tbody>
+    <!-- Comparison -->
+    <section class="section" style="padding-top:0;">
+      <div class="section-head center">
+        <h2 class="section-title split">Compare plans</h2>
+      </div>
+      <div class="cmp-scroll reveal">
+        <table class="cmp">
+          <thead><tr><th>Feature</th><th>Developer</th><th>Team</th><th>Enterprise</th></tr></thead>
+          <tbody>
+            <tr><td>Log analyses</td><td>Unlimited</td><td>Unlimited</td><td>Unlimited</td></tr>
+            <tr><td>GitHub integration</td><td><span class="yes-c">✓</span></td><td><span class="yes-c">✓</span></td><td><span class="yes-c">✓</span></td></tr>
+            <tr><td>C++ crash analysis</td><td><span class="yes-c">✓</span></td><td><span class="yes-c">✓</span></td><td><span class="yes-c">✓</span></td></tr>
+            <tr><td>Python SDK</td><td><span class="yes-c">✓</span></td><td><span class="yes-c">✓</span></td><td><span class="yes-c">✓</span></td></tr>
+            <tr><td>Team workspaces</td><td><span class="no-c">—</span></td><td><span class="soon-c">Soon</span></td><td><span class="soon-c">Soon</span></td></tr>
+            <tr><td>Slack integration</td><td><span class="no-c">—</span></td><td><span class="soon-c">Soon</span></td><td><span class="soon-c">Soon</span></td></tr>
+            <tr><td>Sentry webhook</td><td><span class="no-c">—</span></td><td><span class="soon-c">Soon</span></td><td><span class="soon-c">Soon</span></td></tr>
+            <tr><td>On-premise deployment</td><td><span class="no-c">—</span></td><td><span class="no-c">—</span></td><td><span class="soon-c">Soon</span></td></tr>
+            <tr><td>Custom AI model</td><td><span class="no-c">—</span></td><td><span class="no-c">—</span></td><td><span class="soon-c">Soon</span></td></tr>
+            <tr><td>SSO / SAML</td><td><span class="no-c">—</span></td><td><span class="no-c">—</span></td><td><span class="soon-c">Soon</span></td></tr>
+            <tr><td>SLA guarantee</td><td><span class="no-c">—</span></td><td><span class="no-c">—</span></td><td><span class="soon-c">Soon</span></td></tr>
+          </tbody>
         </table>
-    </div>
+      </div>
+    </section>
 
     <!-- FAQ -->
-    <div class="faq fade-up">
-        <h2>Frequently asked questions</h2>
+    <section class="section" style="padding-top:0;">
+      <div class="section-head center">
+        <h2 class="section-title split">Frequently asked questions</h2>
+      </div>
+      <div class="faq-list reveal">
+        <details class="faq-item"><summary>Is the free plan really free forever? <span class="ico">+</span></summary><div class="faq-a">Yes. The Developer plan is free forever for individual use. We'll always maintain a free tier — it's how we build trust with engineers before asking for money.</div></details>
+        <details class="faq-item"><summary>When will paid plans launch? <span class="ico">+</span></summary><div class="faq-a">We're currently in beta. Paid plans (Team and Enterprise) are in development and will launch later in 2026. You'll be notified when they're ready if you sign up now.</div></details>
+        <details class="faq-item"><summary>Do I need to give Roota access to my codebase? <span class="ico">+</span></summary><div class="faq-a">For public GitHub repos, no — Roota fetches files directly from GitHub's public API without authentication. For private repos, you'll provide a GitHub token with read-only access. We never store your source code permanently.</div></details>
+        <details class="faq-item"><summary>What AI model does Roota use? <span class="ico">+</span></summary><div class="faq-a">Currently Roota uses Google Gemini for analysis. Multi-model support (Claude, GPT-4, and local LLMs for on-premise) is on the roadmap for Enterprise.</div></details>
+        <details class="faq-item"><summary>Can I self-host Roota? <span class="ico">+</span></summary><div class="faq-a">The core engine is open source and can be self-hosted today by cloning the repository. A packaged on-premise deployment option with support will be available in the Enterprise plan.</div></details>
+      </div>
+    </section>
 
-        <div class="faq-item">
-            <div class="faq-q">Is the free plan really free forever? <span>+</span></div>
-            <div class="faq-a">Yes. The Developer plan is free forever for individual use. We'll always maintain a free tier — it's how we build trust with engineers before asking for money.</div>
-        </div>
-
-        <div class="faq-item">
-            <div class="faq-q">When will paid plans launch? <span>+</span></div>
-            <div class="faq-a">We're currently in beta. Paid plans (Team and Enterprise) are in development and will launch later in 2026. You'll be notified when they're ready if you sign up now.</div>
-        </div>
-
-        <div class="faq-item">
-            <div class="faq-q">Do I need to give Roota access to my codebase? <span>+</span></div>
-            <div class="faq-a">For public GitHub repos, no — Roota fetches files directly from GitHub's public API without authentication. For private repos, you'll provide a GitHub token with read-only access. We never store your source code permanently.</div>
-        </div>
-
-        <div class="faq-item">
-            <div class="faq-q">What AI model does Roota use? <span>+</span></div>
-            <div class="faq-a">Currently Roota uses Google Gemini for analysis. Multi-model support (Claude, GPT-4, and local LLMs for on-premise) is on the roadmap for Enterprise.</div>
-        </div>
-
-        <div class="faq-item">
-            <div class="faq-q">Can I self-host Roota? <span>+</span></div>
-            <div class="faq-a">The core engine is open source and can be self-hosted today by cloning the repository. A packaged on-premise deployment option with support will be available in the Enterprise plan.</div>
-        </div>
-    </div>
-
-    <!-- BOTTOM CTA -->
-    <div class="bottom-cta fade-up">
-        <h2>Start debugging smarter today.</h2>
+    <!-- Bottom CTA -->
+    <section class="section" style="padding-top:0;">
+      <div class="cta reveal" style="max-width:none;margin:0;">
+        <h2 class="split">Start debugging smarter today.</h2>
         <p>Free forever for individual developers. No credit card required.</p>
-        <a href="/login" class="btn-primary" style="padding:13px 32px; font-size:0.95rem; border-radius:8px; display:inline-block;">Get Started Free</a>
+        <div class="row center"><a href="/login" class="btn btn-primary btn-lg">Get started free <span class="arw">→</span></a></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <span class="footer-status"><span class="dot pulse"></span> All systems operational</span>
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="/home" class="brand" aria-label="Roota home"><svg class="logo" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="1" y="1" width="30" height="30" rx="8" fill="#0e1110" stroke="#34e28a" stroke-width="2"/><circle cx="10" cy="16" r="2.6" fill="#7defb6"/><path d="M14.5 11.5L21 16l-6.5 4.5" stroke="#34e28a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Roo<span class="lw-2">ta</span></span></a>
+          <p>The AI-native debugger for mission-critical software. Root cause and fix, grounded in your real source.</p>
+        </div>
+        <div class="footer-col"><h4>Product</h4><ul><li><a href="/home#features">Features</a></li><li><a href="/pricing">Pricing</a></li><li><a href="/changelog">Changelog</a></li><li><a href="/docs-page">Docs</a></li></ul></div>
+        <div class="footer-col"><h4>Legal</h4><ul><li><a href="/terms">Terms of Service</a></li><li><a href="/privacy">Privacy Policy</a></li></ul></div>
+        <div class="footer-col"><h4>Connect</h4><ul><li><a href="https://github.com" rel="noopener">GitHub</a></li><li><a href="mailto:abdkhan1076@gmail.com">Contact</a></li></ul></div>
+      </div>
+      <div class="footer-bottom">
+        <p>© <span data-year>2026</span> roota_technologies — all rights reserved</p>
+        <div class="socials">
+          <a href="https://github.com" class="social" rel="noopener" aria-label="GitHub"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.5 2 2 6.6 2 12.3c0 4.5 2.9 8.3 6.8 9.7.5.1.7-.2.7-.5v-1.7c-2.8.6-3.4-1.4-3.4-1.4-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.6 2.4 1.1 3 .8.1-.7.4-1.1.6-1.4-2.2-.3-4.6-1.1-4.6-5 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.7 0 0 .8-.3 2.7 1a9.3 9.3 0 0 1 5 0c1.9-1.3 2.7-1 2.7-1 .5 1.4.2 2.4.1 2.7.6.7 1 1.6 1 2.7 0 3.9-2.3 4.7-4.6 5 .4.3.7.9.7 1.9v2.8c0 .3.2.6.7.5A10.1 10.1 0 0 0 22 12.3C22 6.6 17.5 2 12 2Z"/></svg></a>
+          <a href="mailto:abdkhan1076@gmail.com" class="social" aria-label="Email"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></a>
+        </div>
+      </div>
     </div>
+  </footer>
 
-</div>
-
-<!-- FOOTER -->
-<footer>
-    <a href="/home" class="nav-logo" style="text-decoration:none;">
-        <svg class="logo-icon" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="1" y="1" width="30" height="30" rx="7" stroke="#3B82F6" stroke-width="2.5" fill="none"/>
-            <circle cx="10" cy="16" r="2.5" fill="#3B82F6"/>
-            <path d="M15 11.5L21.5 16L15 20.5" stroke="#3B82F6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        Roota
-    </a>
-    <ul class="footer-links">
-        <li><a href="/docs-page">Docs</a></li>
-        <li><a href="/pricing">Pricing</a></li>
-        <li><a href="/privacy">Privacy Policy</a></li>
-        <li><a href="/terms">Terms</a></li>
-    </ul>
-    <p>© 2026 Roota Technologies. All rights reserved.</p>
-</footer>
-
-<script>
-// SHADER — same as all other pages
-(function() {
-    const canvas = document.getElementById('shader-canvas');
-    function syncSize() {
-        const w = canvas.clientWidth || 1280;
-        const h = canvas.clientHeight || 720;
-        if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
-    }
-    if (typeof ResizeObserver !== 'undefined') new ResizeObserver(syncSize).observe(canvas);
-    syncSize();
-    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-    if (!gl) return;
-    const vs = `attribute vec2 a_position; varying vec2 v_texCoord; void main() { v_texCoord = a_position * 0.5 + 0.5; gl_Position = vec4(a_position, 0.0, 1.0); }`;
-    const fs = `precision highp float; uniform float u_time; uniform vec2 u_resolution; uniform vec2 u_mouse; varying vec2 v_texCoord; void main() { vec2 uv = v_texCoord; vec2 mouse = u_mouse / u_resolution; float grid_size = 50.0; vec2 grid_uv = fract(uv * u_resolution / grid_size); float line_thickness = 0.02; float grid = smoothstep(line_thickness, 0.0, abs(grid_uv.x - 0.5)) + smoothstep(line_thickness, 0.0, abs(grid_uv.y - 0.5)); float dist = distance(uv, mouse); float glow = smoothstep(0.3, 0.0, dist) * 0.15; vec3 grid_color = vec3(0.125, 0.125, 0.125); vec3 accent_color = vec3(0.23, 0.51, 0.96); float pulse = sin(u_time * 0.5 + uv.x * 10.0 + uv.y * 10.0) * 0.5 + 0.5; float pattern = smoothstep(0.48, 0.5, fract(uv.x * 5.0 + u_time * 0.1)) * smoothstep(0.48, 0.5, fract(uv.y * 5.0 - u_time * 0.05)); vec3 grid_layer = mix(vec3(0.035, 0.035, 0.035), grid_color, grid * 0.3); grid_layer += accent_color * glow; grid_layer += accent_color * pattern * pulse * 0.1; vec2 p = (uv * 2.0 - 1.0); p.x *= u_resolution.x / u_resolution.y; float t = u_time * 0.15; for(float i = 1.0; i < 4.0; i++) { p.x += 0.3 / i * sin(i * 3.0 * p.y + t + cos((t / (i * 2.0)) + i)); p.y += 0.3 / i * cos(i * 3.0 * p.x + t + sin((t / (i * 2.0)) + i)); } vec3 color_obsidian = vec3(0.02, 0.02, 0.03); vec3 color_cobalt = vec3(0.05, 0.2, 0.5); vec3 color_accent = vec3(0.1, 0.4, 0.9); float brightness = 0.5 * sin(p.x + p.y) + 0.5; vec3 fluid_layer = mix(color_obsidian, color_cobalt, brightness * 0.28); fluid_layer += color_accent * (0.022 / length(p)); float vignette = 1.0 - smoothstep(0.5, 1.5, length(v_texCoord - 0.5)); fluid_layer *= vignette; vec3 final_color = 1.0 - (1.0 - grid_layer) * (1.0 - fluid_layer); final_color *= 0.62; gl_FragColor = vec4(final_color, 1.0); }`;
-    function cs(type, src) { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); return s; }
-    const prog = gl.createProgram();
-    gl.attachShader(prog, cs(gl.VERTEX_SHADER, vs));
-    gl.attachShader(prog, cs(gl.FRAGMENT_SHADER, fs));
-    gl.linkProgram(prog); gl.useProgram(prog);
-    const buf = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,1,-1,-1,1,1,1]), gl.STATIC_DRAW);
-    const pos = gl.getAttribLocation(prog, 'a_position');
-    gl.enableVertexAttribArray(pos);
-    gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
-    const uTime = gl.getUniformLocation(prog, 'u_time');
-    const uRes = gl.getUniformLocation(prog, 'u_resolution');
-    const uMouse = gl.getUniformLocation(prog, 'u_mouse');
-    let mouse = { x: canvas.width/2, y: canvas.height/2 };
-    window.addEventListener('mousemove', (e) => {
-        const rect = canvas.getBoundingClientRect();
-        if (rect.width && rect.height) { mouse.x = ((e.clientX-rect.left)/rect.width)*canvas.width; mouse.y = (1-(e.clientY-rect.top)/rect.height)*canvas.height; }
-    });
-    function render(t) {
-        if (typeof ResizeObserver === 'undefined') syncSize();
-        gl.viewport(0, 0, canvas.width, canvas.height);
-        if (uTime) gl.uniform1f(uTime, t * 0.001);
-        if (uRes) gl.uniform2f(uRes, canvas.width, canvas.height);
-        if (uMouse) gl.uniform2f(uMouse, mouse.x, mouse.y);
-        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-        requestAnimationFrame(render);
-    }
-    render(0);
-})();
-
-// Scroll animations
-const observer = new IntersectionObserver(entries => {
-    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
-}, { threshold: 0.1 });
-document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
-</script>
+  <script src="/assets/roota.js"></script>
 </body>
 </html>

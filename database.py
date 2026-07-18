@@ -4,7 +4,6 @@ from datetime import datetime
 from pathlib import Path
 import secrets
 import bcrypt
-import secrets
 from datetime import datetime, timedelta
 
 DB_PATH = Path(__file__).parent / "debugai.db"

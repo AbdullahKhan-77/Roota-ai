@@ -19,6 +19,9 @@ from email_utils import send_reset_email
 
 app = FastAPI(title="Roota API", version="0.1.0")
 
+if os.path.isdir("assets"):
+    app.mount("/assets", StaticFiles(directory="assets"), name="assets")
+
 init_db()
 def get_current_user(x_api_key: str = Header(None)):
     if not x_api_key:
@@ -235,7 +238,7 @@ async def ingest(data: dict, x_api_key: str = Header(None)):
     except HTTPException:
         raise
     except Exception as e:
-        return {"status": "error", "message": str(e)}
+        return {"status": "error", "message": f"server-side analysis failed: {e}"}
     
 @app.post("/register")
 def register(
@@ -312,6 +315,26 @@ def change_password(
     conn.commit()
     conn.close()
     return {"status": "success"}
+
+@app.post("/waitlist")
+def join_waitlist(email: str = Form(...)):
+    email = email.strip().lower()
+    if not email or "@" not in email or "." not in email.split("@")[-1] or len(email) > 254:
+        raise HTTPException(status_code=400, detail="Enter a valid email address")
+    conn = sqlite3.connect(DB_PATH)
+    try:
+        cursor = conn.cursor()
+        cursor.execute('''CREATE TABLE IF NOT EXISTS waitlist (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email TEXT UNIQUE NOT NULL,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP
+        )''')
+        cursor.execute('INSERT OR IGNORE INTO waitlist (email) VALUES (?)', (email,))
+        conn.commit()
+    finally:
+        conn.close()
+    return {"status": "success"}
+
 
 @app.post("/forgot-password")
 def forgot_password(email: str = Form(...)):

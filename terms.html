@@ -1,240 +1,207 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Roota — Terms of Service</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' fill='none'%3E%3Crect x='1' y='1' width='30' height='30' rx='7' stroke='%233B82F6' stroke-width='2.5' fill='%23090909'/%3E%3Ccircle cx='10' cy='16' r='2.5' fill='%233B82F6'/%3E%3Cpath d='M15 11.5L21.5 16L15 20.5' stroke='%233B82F6' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        :root {
-            --bg: #09090B; --surface: #111827; --surface2: #1F2937;
-            --border: #27272A; --blue: #3B82F6; --blue-dim: #3B82F615;
-            --text: #F9FAFB; --muted: #9CA3AF; --muted2: #52525B;
-        }
-        html { scroll-behavior: smooth; }
-        body { font-family: 'Space Grotesk', sans-serif; background: var(--bg); color: var(--text); overflow-x: hidden; }
-        #shader-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
-        nav {
-            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 18px 48px; background: rgba(9,9,9,0.85);
-            backdrop-filter: blur(12px); border-bottom: 1px solid var(--border);
-        }
-        .nav-logo { display: flex; align-items: center; gap: 10px; font-size: 1.1rem; font-weight: 700; color: var(--text); text-decoration: none; }
-        .logo-icon { width: 32px; height: 32px; flex-shrink: 0; }
-        .nav-actions { display: flex; gap: 10px; }
-        .btn-ghost { padding: 8px 18px; background: transparent; border: 1px solid var(--border); border-radius: 6px; color: var(--muted); font-size: 0.875rem; font-weight: 500; cursor: pointer; text-decoration: none; transition: all 0.2s; font-family: 'Space Grotesk', sans-serif; }
-        .btn-ghost:hover { color: var(--text); border-color: #444; }
-        .btn-primary { padding: 8px 18px; background: var(--blue); border: none; border-radius: 6px; color: white; font-size: 0.875rem; font-weight: 600; cursor: pointer; text-decoration: none; font-family: 'Space Grotesk', sans-serif; }
-        .page { position: relative; z-index: 1; max-width: 780px; margin: 0 auto; padding: 140px 24px 100px; }
-        .page-header { margin-bottom: 48px; }
-        .eyebrow { font-size: 0.72rem; color: var(--muted2); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 12px; }
-        h1 { font-size: 2.5rem; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 12px; }
-        .last-updated { font-size: 0.82rem; color: var(--muted2); font-family: 'JetBrains Mono', monospace; }
-        .toc { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px 24px; margin-bottom: 40px; }
-        .toc h3 { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted2); margin-bottom: 12px; }
-        .toc ol { padding-left: 16px; display: flex; flex-direction: column; gap: 6px; }
-        .toc a { color: var(--blue); text-decoration: none; font-size: 0.875rem; }
-        .toc a:hover { text-decoration: underline; }
-        .section { margin-bottom: 48px; scroll-margin-top: 80px; }
-        h2 { font-size: 1.3rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
-        h3 { font-size: 1rem; font-weight: 600; margin-top: 20px; margin-bottom: 8px; }
-        p { color: var(--muted); line-height: 1.8; margin-bottom: 12px; font-size: 0.9rem; }
-        ul, ol { color: var(--muted); padding-left: 20px; line-height: 2; font-size: 0.9rem; margin-bottom: 12px; }
-        li strong { color: var(--text); }
-        a { color: var(--blue); }
-        .callout { background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.2); border-radius: 8px; padding: 14px 18px; margin-bottom: 16px; font-size: 0.875rem; color: #93c5fd; line-height: 1.7; }
-        .warn-callout { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2); border-radius: 8px; padding: 14px 18px; margin-bottom: 16px; font-size: 0.875rem; color: #fcd34d; line-height: 1.7; }
-        footer { position: relative; z-index: 1; border-top: 1px solid var(--border); padding: 32px 48px; display: flex; justify-content: space-between; align-items: center; }
-        footer p { color: var(--muted2); font-size: 0.8rem; }
-        .footer-links { display: flex; gap: 20px; }
-        .footer-links a { color: var(--muted2); text-decoration: none; font-size: 0.8rem; }
-        .footer-links a:hover { color: var(--text); }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Roota — Terms of Service</title>
+  <meta name="description" content="Roota's terms of service, written plainly.">
+  <meta name="theme-color" content="#0a0c0b">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='1' y='1' width='30' height='30' rx='8' fill='%230e1110' stroke='%2334e28a' stroke-width='2'/%3E%3Ccircle cx='10' cy='16' r='2.6' fill='%237defb6'/%3E%3Cpath d='M14.5 11.5L21 16l-6.5 4.5' stroke='%2334e28a' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/roota.css">
+  <style>
+    .legal-layout { max-width: 1080px; margin: 0 auto; padding: calc(var(--nav-h) + 40px) var(--pad-x) 60px; }
+    .legal-header { margin-bottom: 30px; }
+    .legal-header h1 { font-size: clamp(2.2rem, 4vw, 3rem); margin: 12px 0 8px; }
+    .last-updated { font-size: 0.85rem; color: var(--muted); font-family: var(--font-mono); }
+    .legal-callout { background: rgba(52,226,138,0.08); border: 1px solid rgba(52,226,138,0.28); border-radius: var(--r); padding: 16px 18px; color: var(--text-2); font-size: 0.92rem; line-height: 1.6; margin-bottom: 40px; }
+    .warn-callout { background: rgba(242,180,92,0.08); border: 1px solid rgba(242,180,92,0.3); border-radius: var(--r); padding: 14px 16px; color: var(--text-2); font-size: 0.92rem; margin: 16px 0; }
+
+    .legal-grid { display: grid; grid-template-columns: 240px 1fr; gap: 48px; align-items: start; }
+    @media (max-width: 860px) { .legal-grid { grid-template-columns: 1fr; gap: 24px; } }
+    .toc { position: sticky; top: calc(var(--nav-h) + 24px); }
+    @media (max-width: 860px) { .toc { position: static; border: 1px solid var(--line); border-radius: var(--r); padding: 16px; } }
+    .toc h3 { font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); margin-bottom: 12px; }
+    .toc ol { list-style: none; counter-reset: toc; display: flex; flex-direction: column; gap: 2px; }
+    .toc li { counter-increment: toc; }
+    .toc a { display: block; padding: 6px 10px; font-size: 0.85rem; color: var(--muted); border-radius: var(--r-xs); transition: color 0.18s var(--ease), background 0.18s var(--ease); }
+    .toc a::before { content: counter(toc) ". "; color: var(--faint); }
+    .toc a:hover, .toc a.active { color: var(--iris-2); background: rgba(52,226,138,0.06); }
+
+    .legal-body .section { max-width: none; margin: 0 0 36px; padding: 0; scroll-margin-top: calc(var(--nav-h) + 24px); }
+    .legal-body h2 { font-size: 1.3rem; margin-bottom: 12px; }
+    .legal-body p { color: var(--muted); line-height: 1.75; margin-bottom: 12px; }
+    .legal-body ul { color: var(--muted); line-height: 1.8; margin: 0 0 14px 20px; }
+    .legal-body li { margin-bottom: 6px; }
+    .legal-body strong { color: var(--text); font-weight: 600; }
+    .legal-body a { color: var(--iris-2); }
+  </style>
 </head>
 <body>
+  <a href="#main" class="skip-link">Skip to content</a>
+  <div class="backdrop" aria-hidden="true"><div class="aurora a1"></div><div class="aurora a2"></div></div>
+  <div class="scrim" aria-hidden="true"></div>
 
-<canvas id="shader-canvas"></canvas>
-
-<nav>
-    <a href="/home" class="nav-logo">
-        <svg class="logo-icon" viewBox="0 0 32 32" fill="none">
-            <rect x="1" y="1" width="30" height="30" rx="7" stroke="#3B82F6" stroke-width="2.5" fill="none"/>
-            <circle cx="10" cy="16" r="2.5" fill="#3B82F6"/>
-            <path d="M15 11.5L21.5 16L15 20.5" stroke="#3B82F6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        Roota
+  <header class="nav">
+    <a href="/home" class="brand" aria-label="Roota home">
+      <svg class="logo" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="1" y="1" width="30" height="30" rx="8" fill="#0e1110" stroke="#34e28a" stroke-width="2"/><circle cx="10" cy="16" r="2.6" fill="#7defb6"/><path d="M14.5 11.5L21 16l-6.5 4.5" stroke="#34e28a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>Roo<span class="lw-2">ta</span></span>
     </a>
+    <button class="menu-btn" aria-label="Toggle menu" aria-expanded="false" aria-controls="navLinks"><span></span><span></span><span></span></button>
+    <nav aria-label="Primary">
+      <ul class="nav-links" id="navLinks">
+        <li><a href="/home#features">Features</a></li>
+        <li><a href="/docs-page">Docs</a></li>
+        <li><a href="/pricing">Pricing</a></li>
+        <li><a href="/changelog">Changelog</a></li>
+      </ul>
+    </nav>
     <div class="nav-actions">
-        <a href="/home" class="btn-ghost">Home</a>
-        <a href="/login" class="btn-primary">Get Started</a>
+      <a href="/home" class="btn btn-ghost hide-mobile">Home</a>
+      <a href="/login" class="btn btn-primary">Get started <span class="arw">→</span></a>
     </div>
-</nav>
+  </header>
 
-<div class="page">
-    <div class="page-header">
-        <p class="eyebrow">Legal</p>
-        <h1>Terms of Service</h1>
-        <p class="last-updated">Last updated: July 2026</p>
+  <main id="main" class="legal-layout">
+    <div class="legal-header">
+      <span class="eyebrow">Legal</span>
+      <h1>Terms of Service</h1>
+      <p class="last-updated">Last updated: July 2026</p>
     </div>
+    <div class="legal-callout">These terms are written plainly. By using Roota, you agree to them. If you have questions, email us.</div>
 
-    <div class="callout">
-        These terms are written plainly. By using Roota, you agree to them. If you have questions, email us.
-    </div>
-
-    <div class="toc">
+    <div class="legal-grid">
+      <nav class="toc" aria-label="Contents">
         <h3>Contents</h3>
         <ol>
-            <li><a href="#acceptance">Acceptance of terms</a></li>
-            <li><a href="#the-service">The service</a></li>
-            <li><a href="#your-account">Your account</a></li>
-            <li><a href="#acceptable-use">Acceptable use</a></li>
-            <li><a href="#your-content">Your content</a></li>
-            <li><a href="#intellectual-property">Intellectual property</a></li>
-            <li><a href="#disclaimers">Disclaimers</a></li>
-            <li><a href="#limitation">Limitation of liability</a></li>
-            <li><a href="#termination">Termination</a></li>
-            <li><a href="#changes">Changes to these terms</a></li>
-            <li><a href="#contact">Contact</a></li>
+          <li><a href="#acceptance" class="active">Acceptance of terms</a></li>
+          <li><a href="#the-service">The service</a></li>
+          <li><a href="#your-account">Your account</a></li>
+          <li><a href="#acceptable-use">Acceptable use</a></li>
+          <li><a href="#your-content">Your content</a></li>
+          <li><a href="#intellectual-property">Intellectual property</a></li>
+          <li><a href="#disclaimers">Disclaimers</a></li>
+          <li><a href="#limitation">Limitation of liability</a></li>
+          <li><a href="#termination">Termination</a></li>
+          <li><a href="#changes">Changes to these terms</a></li>
+          <li><a href="#contact">Contact</a></li>
         </ol>
-    </div>
+      </nav>
 
-    <div class="section" id="acceptance">
-        <h2>1. Acceptance of terms</h2>
-        <p>By creating an account or using Roota ("the Service"), you agree to be bound by these Terms of Service. If you do not agree, do not use the Service.</p>
-        <p>Roota is currently in beta. The Service is provided as-is and may change significantly as we develop it.</p>
-    </div>
-
-    <div class="section" id="the-service">
-        <h2>2. The service</h2>
-        <p>Roota is an AI-powered production log analyzer. It allows you to:</p>
-        <ul>
+      <div class="legal-body">
+        <section class="section" id="acceptance">
+          <h2>1. Acceptance of terms</h2>
+          <p>By creating an account or using Roota ("the Service"), you agree to be bound by these Terms of Service. If you do not agree, do not use the Service.</p>
+          <p>Roota is currently in beta. The Service is provided as-is and may change significantly as we develop it.</p>
+        </section>
+        <section class="section" id="the-service">
+          <h2>2. The service</h2>
+          <p>Roota is an AI-powered production log analyzer. It allows you to:</p>
+          <ul>
             <li>Upload or paste log files for AI-powered analysis</li>
             <li>Connect a GitHub repository for source-code-aware diagnosis</li>
             <li>Use SDKs to automatically capture and analyze crashes from your applications</li>
             <li>View and manage your incident history</li>
-        </ul>
-        <p>Roota is a developer tool. It provides suggestions and diagnoses — it does not automatically modify your code or infrastructure. You are responsible for all decisions made based on Roota's output.</p>
-    </div>
-
-    <div class="section" id="your-account">
-        <h2>3. Your account</h2>
-        <p>To use Roota, you must create an account with a valid email address and password. You are responsible for:</p>
-        <ul>
+          </ul>
+          <p>Roota is a developer tool. It provides suggestions and diagnoses — it does not automatically modify your code or infrastructure. You are responsible for all decisions made based on Roota's output.</p>
+        </section>
+        <section class="section" id="your-account">
+          <h2>3. Your account</h2>
+          <p>To use Roota, you must create an account with a valid email address and password. You are responsible for:</p>
+          <ul>
             <li>Keeping your password secure and not sharing it with others</li>
             <li>All activity that occurs under your account</li>
             <li>Notifying us immediately if you believe your account has been compromised</li>
-        </ul>
-        <p>You must be at least 16 years old to use Roota.</p>
-    </div>
-
-    <div class="section" id="acceptable-use">
-        <h2>4. Acceptable use</h2>
-        <p>You agree not to use Roota to:</p>
-        <ul>
+          </ul>
+          <p>You must be at least 16 years old to use Roota.</p>
+        </section>
+        <section class="section" id="acceptable-use">
+          <h2>4. Acceptable use</h2>
+          <p>You agree not to use Roota to:</p>
+          <ul>
             <li><strong>Upload malicious content</strong> — including log files crafted to exploit AI models or our infrastructure</li>
             <li><strong>Attempt to access other users' data</strong> — all data is isolated by account; any attempt to circumvent this is prohibited</li>
             <li><strong>Abuse the API</strong> — automated or bulk requests that exceed reasonable usage and degrade service for others</li>
             <li><strong>Upload regulated sensitive data</strong> — Roota is not certified for HIPAA, PCI-DSS, or similar regulated data. Do not upload patient records, payment card data, or equivalent.</li>
             <li><strong>Violate applicable laws</strong> — including export control laws, privacy laws, or intellectual property laws</li>
-        </ul>
-        <p>We reserve the right to suspend accounts that violate these terms without prior notice.</p>
-    </div>
-
-    <div class="section" id="your-content">
-        <h2>5. Your content</h2>
-        <p>You own all content you upload to Roota — your log files, your diagnoses, your incident history. We do not claim ownership over your data.</p>
-        <p>By using Roota, you grant us a limited license to process your content for the sole purpose of providing the Service — specifically to send your log content to our AI provider (Google Gemini) for analysis and to store the results in your account.</p>
-        <p>We will not use your content for any purpose beyond providing the Service to you.</p>
-    </div>
-
-    <div class="section" id="intellectual-property">
-        <h2>6. Intellectual property</h2>
-        <p>The Roota name, logo, web application, and underlying software are owned by Roota Technologies. You may not copy, reproduce, or redistribute them without written permission.</p>
-        <p>The core engine is open source (MIT license). You may use, modify, and distribute the open source components in accordance with that license. The hosted service, brand, and proprietary features are not covered by the open source license.</p>
-    </div>
-
-    <div class="section" id="disclaimers">
-        <h2>7. Disclaimers</h2>
-        <div class="warn-callout">
-            Roota is provided "as is" and "as available" without warranties of any kind, express or implied.
-        </div>
-        <p>We do not warrant that:</p>
-        <ul>
+          </ul>
+          <p>We reserve the right to suspend accounts that violate these terms without prior notice.</p>
+        </section>
+        <section class="section" id="your-content">
+          <h2>5. Your content</h2>
+          <p>You own all content you upload to Roota — your log files, your diagnoses, your incident history. We do not claim ownership over your data.</p>
+          <p>By using Roota, you grant us a limited license to process your content for the sole purpose of providing the Service — specifically to send your log content to our AI provider (Google Gemini) for analysis and to store the results in your account.</p>
+          <p>We will not use your content for any purpose beyond providing the Service to you.</p>
+        </section>
+        <section class="section" id="intellectual-property">
+          <h2>6. Intellectual property</h2>
+          <p>The Roota name, logo, web application, and underlying software are owned by Roota Technologies. You may not copy, reproduce, or redistribute them without written permission.</p>
+          <p>The core engine is open source (MIT license). You may use, modify, and distribute the open source components in accordance with that license. The hosted service, brand, and proprietary features are not covered by the open source license.</p>
+        </section>
+        <section class="section" id="disclaimers">
+          <h2>7. Disclaimers</h2>
+          <div class="warn-callout">Roota is provided "as is" and "as available" without warranties of any kind, express or implied.</div>
+          <p>We do not warrant that:</p>
+          <ul>
             <li>The Service will be uninterrupted, error-free, or secure at all times</li>
             <li>AI diagnoses will be accurate, complete, or suitable for your specific situation</li>
             <li>Any particular bug or issue will be fixed within a specific timeframe</li>
-        </ul>
-        <p>Roota is a tool to assist engineers. The final judgment on any diagnosis, fix, or production change rests with you.</p>
+          </ul>
+          <p>Roota is a tool to assist engineers. The final judgment on any diagnosis, fix, or production change rests with you.</p>
+        </section>
+        <section class="section" id="limitation">
+          <h2>8. Limitation of liability</h2>
+          <p>To the maximum extent permitted by applicable law, Roota Technologies shall not be liable for any indirect, incidental, special, consequential, or punitive damages — including loss of revenue, loss of data, or service interruption — arising from your use of the Service.</p>
+          <p>Our total liability to you for any claim arising from these terms or your use of the Service shall not exceed the amount you paid us in the 12 months preceding the claim. For users on the free tier, this limit is $0.</p>
+        </section>
+        <section class="section" id="termination">
+          <h2>9. Termination</h2>
+          <p>You may stop using Roota at any time. You may request account deletion by emailing us — we will permanently delete your account and associated data within 7 days.</p>
+          <p>We may suspend or terminate your account if you violate these terms, with or without notice depending on the severity of the violation.</p>
+          <p>Upon termination, your right to use the Service ends immediately. Sections covering intellectual property, disclaimers, and limitation of liability survive termination.</p>
+        </section>
+        <section class="section" id="changes">
+          <h2>10. Changes to these terms</h2>
+          <p>We may update these terms as the product evolves. When we make significant changes, we will update the "Last updated" date at the top of this page.</p>
+          <p>Continued use of Roota after changes are posted constitutes acceptance of the updated terms. If you disagree with a change, your remedy is to stop using the Service and request account deletion.</p>
+        </section>
+        <section class="section" id="contact">
+          <h2>11. Contact</h2>
+          <p>Questions about these terms? Contact us:</p>
+          <p><strong>Email:</strong> <a href="mailto:abdkhan1076@gmail.com">abdkhan1076@gmail.com</a></p>
+          <p>We aim to respond within 48 hours.</p>
+        </section>
+      </div>
     </div>
+  </main>
 
-    <div class="section" id="limitation">
-        <h2>8. Limitation of liability</h2>
-        <p>To the maximum extent permitted by applicable law, Roota Technologies shall not be liable for any indirect, incidental, special, consequential, or punitive damages — including loss of revenue, loss of data, or service interruption — arising from your use of the Service.</p>
-        <p>Our total liability to you for any claim arising from these terms or your use of the Service shall not exceed the amount you paid us in the 12 months preceding the claim. For users on the free tier, this limit is $0.</p>
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-bottom" style="padding-top:0;">
+        <a href="/home" class="brand" aria-label="Roota home"><svg class="logo" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="1" y="1" width="30" height="30" rx="8" fill="#0e1110" stroke="#34e28a" stroke-width="2"/><circle cx="10" cy="16" r="2.6" fill="#7defb6"/><path d="M14.5 11.5L21 16l-6.5 4.5" stroke="#34e28a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Roo<span class="lw-2">ta</span></span></a>
+        <div class="row" style="gap:22px;font-size:0.85rem;">
+          <a href="/terms" style="color:var(--muted);">Terms</a>
+          <a href="/privacy" style="color:var(--muted);">Privacy</a>
+          <a href="/home" style="color:var(--muted);">Home</a>
+        </div>
+        <p>© <span data-year>2026</span> roota_technologies</p>
+      </div>
     </div>
+  </footer>
 
-    <div class="section" id="termination">
-        <h2>9. Termination</h2>
-        <p>You may stop using Roota at any time. You may request account deletion by emailing us — we will permanently delete your account and associated data within 7 days.</p>
-        <p>We may suspend or terminate your account if you violate these terms, with or without notice depending on the severity of the violation.</p>
-        <p>Upon termination, your right to use the Service ends immediately. Sections covering intellectual property, disclaimers, and limitation of liability survive termination.</p>
-    </div>
-
-    <div class="section" id="changes">
-        <h2>10. Changes to these terms</h2>
-        <p>We may update these terms as the product evolves. When we make significant changes, we will update the "Last updated" date at the top of this page.</p>
-        <p>Continued use of Roota after changes are posted constitutes acceptance of the updated terms. If you disagree with a change, your remedy is to stop using the Service and request account deletion.</p>
-    </div>
-
-    <div class="section" id="contact">
-        <h2>11. Contact</h2>
-        <p>Questions about these terms? Contact us:</p>
-        <p><strong>Email:</strong> <a href="mailto:abdkhan1076@gmail.com">abdkhan1076@gmail.com</a></p>
-        <p>We aim to respond within 48 hours.</p>
-    </div>
-</div>
-
-<footer>
-    <a href="/home" class="nav-logo" style="text-decoration:none;">
-        <svg class="logo-icon" viewBox="0 0 32 32" fill="none">
-            <rect x="1" y="1" width="30" height="30" rx="7" stroke="#3B82F6" stroke-width="2.5" fill="none"/>
-            <circle cx="10" cy="16" r="2.5" fill="#3B82F6"/>
-            <path d="M15 11.5L21.5 16L15 20.5" stroke="#3B82F6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        Roota
-    </a>
-    <div class="footer-links">
-        <a href="/terms">Terms of Service</a>
-        <a href="/privacy">Privacy Policy</a>
-        <a href="/home">Home</a>
-    </div>
-    <p>© 2026 Roota Technologies.</p>
-</footer>
-
-<script>
-(function() {
-    const canvas = document.getElementById('shader-canvas');
-    function syncSize() { const w=canvas.clientWidth||1280,h=canvas.clientHeight||720; if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;} }
-    if(typeof ResizeObserver!=='undefined') new ResizeObserver(syncSize).observe(canvas);
-    syncSize();
-    const gl=canvas.getContext('webgl')||canvas.getContext('experimental-webgl');
-    if(!gl) return;
-    const vs=`attribute vec2 a_position; varying vec2 v_texCoord; void main(){v_texCoord=a_position*0.5+0.5;gl_Position=vec4(a_position,0.0,1.0);}`;
-    const fs=`precision highp float;uniform float u_time;uniform vec2 u_resolution;uniform vec2 u_mouse;varying vec2 v_texCoord;void main(){vec2 uv=v_texCoord;vec2 mouse=u_mouse/u_resolution;float grid_size=50.0;vec2 grid_uv=fract(uv*u_resolution/grid_size);float line_thickness=0.02;float grid=smoothstep(line_thickness,0.0,abs(grid_uv.x-0.5))+smoothstep(line_thickness,0.0,abs(grid_uv.y-0.5));float dist=distance(uv,mouse);float glow=smoothstep(0.3,0.0,dist)*0.15;vec3 grid_color=vec3(0.125,0.125,0.125);vec3 accent_color=vec3(0.23,0.51,0.96);float pulse=sin(u_time*0.5+uv.x*10.0+uv.y*10.0)*0.5+0.5;float pattern=smoothstep(0.48,0.5,fract(uv.x*5.0+u_time*0.1))*smoothstep(0.48,0.5,fract(uv.y*5.0-u_time*0.05));vec3 grid_layer=mix(vec3(0.035,0.035,0.035),grid_color,grid*0.3);grid_layer+=accent_color*glow;grid_layer+=accent_color*pattern*pulse*0.1;vec2 p=(uv*2.0-1.0);p.x*=u_resolution.x/u_resolution.y;float t=u_time*0.15;for(float i=1.0;i<4.0;i++){p.x+=0.3/i*sin(i*3.0*p.y+t+cos((t/(i*2.0))+i));p.y+=0.3/i*cos(i*3.0*p.x+t+sin((t/(i*2.0))+i));}vec3 color_obsidian=vec3(0.02,0.02,0.03);vec3 color_cobalt=vec3(0.05,0.2,0.5);vec3 color_accent=vec3(0.1,0.4,0.9);float brightness=0.5*sin(p.x+p.y)+0.5;vec3 fluid_layer=mix(color_obsidian,color_cobalt,brightness*0.28);fluid_layer+=color_accent*(0.022/length(p));float vignette=1.0-smoothstep(0.5,1.5,length(v_texCoord-0.5));fluid_layer*=vignette;vec3 final_color=1.0-(1.0-grid_layer)*(1.0-fluid_layer);final_color*=0.62;gl_FragColor=vec4(final_color,1.0);}`;
-    function cs(type,src){const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);return s;}
-    const prog=gl.createProgram();gl.attachShader(prog,cs(gl.VERTEX_SHADER,vs));gl.attachShader(prog,cs(gl.FRAGMENT_SHADER,fs));gl.linkProgram(prog);gl.useProgram(prog);
-    const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
-    const pos=gl.getAttribLocation(prog,'a_position');gl.enableVertexAttribArray(pos);gl.vertexAttribPointer(pos,2,gl.FLOAT,false,0,0);
-    const uTime=gl.getUniformLocation(prog,'u_time'),uRes=gl.getUniformLocation(prog,'u_resolution'),uMouse=gl.getUniformLocation(prog,'u_mouse');
-    let mouse={x:canvas.width/2,y:canvas.height/2};
-    window.addEventListener('mousemove',(e)=>{const rect=canvas.getBoundingClientRect();if(rect.width&&rect.height){mouse.x=((e.clientX-rect.left)/rect.width)*canvas.width;mouse.y=(1-(e.clientY-rect.top)/rect.height)*canvas.height;}});
-    function render(t){if(typeof ResizeObserver==='undefined')syncSize();gl.viewport(0,0,canvas.width,canvas.height);if(uTime)gl.uniform1f(uTime,t*0.001);if(uRes)gl.uniform2f(uRes,canvas.width,canvas.height);if(uMouse)gl.uniform2f(uMouse,mouse.x,mouse.y);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);requestAnimationFrame(render);}
-    render(0);
-})();
-</script>
+  <script src="/assets/roota.js"></script>
+  <script>
+    (function () {
+      const links = Array.from(document.querySelectorAll('.toc a'));
+      const map = new Map();
+      links.forEach(l => { const t = document.getElementById(l.getAttribute('href').slice(1)); if (t) map.set(t, l); });
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(e => { if (e.isIntersecting) { links.forEach(l => l.classList.remove('active')); const link = map.get(e.target); link && link.classList.add('active'); } });
+      }, { rootMargin: '-15% 0px -75% 0px' });
+      map.forEach((_, t) => io.observe(t));
+    })();
+  </script>
 </body>
 </html>

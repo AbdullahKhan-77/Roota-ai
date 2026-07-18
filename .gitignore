@@ -9,3 +9,6 @@ test_handler
 
 cpp_integration/test_crash_win.exe
 cpp_integration/test_crash_win_aslr.exe
+
+.claude/
+Roota_Website_Build_Brief.pdf

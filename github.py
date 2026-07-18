@@ -5,7 +5,11 @@ console = Console()
 def get_repo_file_tree(owner, repo, branch="main"):
     url = f"https://api.github.com/repos/{owner}/{repo}/git/trees/{branch}?recursive=1"
 
-    response = httpx.get(url)
+    try:
+        response = httpx.get(url, timeout=15)
+    except httpx.HTTPError as e:
+        console.print(f"[yellow]Could not reach GitHub ({e}) — continuing without repo tree[/yellow]")
+        return []
 
     if response.status_code == 200:
         data = response.json()
@@ -52,7 +56,11 @@ def find_file_by_function(filename, function_name, all_paths, owner, repo_name,b
 def fetch_file_from_github(owner, repo, filepath, branch="main"):
     url = f"https://raw.githubusercontent.com/{owner}/{repo}/{branch}/{filepath}"
 
-    response = httpx.get(url)
+    try:
+        response = httpx.get(url, timeout=15)
+    except httpx.HTTPError as e:
+        console.print(f"[yellow]Could not reach GitHub ({e}) — skipping {filepath}[/yellow]")
+        return None
 
     if response.status_code == 200:
         return response.text
@@ -63,7 +71,11 @@ def fetch_file_from_github(owner, repo, filepath, branch="main"):
 def get_default_branch(owner, repo):
     url = f"https://api.github.com/repos/{owner}/{repo}"
 
-    response = httpx.get(url)
+    try:
+        response = httpx.get(url, timeout=15)
+    except httpx.HTTPError as e:
+        console.print(f"[yellow]Could not reach GitHub ({e}) — assuming branch 'main'[/yellow]")
+        return "main"
 
     if response.status_code == 200:
         data = response.json()
