@@ -160,4 +160,4 @@ MIT — see [LICENSE](LICENSE) for details.
 
 ## Contributing
 
-*(Add contribution guidelines once you're ready to accept PRs.)*
+Roota is not yet accepting external contributions. Feel free to open issues for bugs or feature requests — pull request guidelines will follow once the project is ready for outside contributors.
