@@ -156,7 +156,7 @@ Planned:
 
 ## License
 
-*(Add your chosen license here — MIT is a common choice for open-source dev tools if you want maximum adoption.)*
+MIT — see [LICENSE](LICENSE) for details.
 
 ## Contributing
 
