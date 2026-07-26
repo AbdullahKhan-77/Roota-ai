@@ -123,7 +123,7 @@ def format_crash_as_log(report, filename, line_number):
     return "\n".join(lines)
 
 
-def send_to_ingest(log_text, api_key, repo=None, server="http://127.0.0.1:8000"):
+def send_to_ingest(log_text, api_key, repo=None, server="https://tryroota.dev"):
     response = httpx.post(
         f"{server}/ingest",
         json={
@@ -136,7 +136,7 @@ def send_to_ingest(log_text, api_key, repo=None, server="http://127.0.0.1:8000")
     )
     return response.json()
 
-def report_crash(report_path, api_key, repo=None, server="http://127.0.0.1:8000"):
+def report_crash(report_path, api_key, repo=None, server="https://tryroota.dev"):
     report = parse_crash_report(report_path)
 
     try:

@@ -8,9 +8,10 @@ load_dotenv(dotenv_path=Path(__file__).parent / ".env")
 
 SMTP_EMAIL = os.getenv("SMTP_EMAIL")
 SMTP_APP_PASSWORD = os.getenv("SMTP_APP_PASSWORD")
+BASE_URL = os.getenv("ROOTA_BASE_URL", "http://127.0.0.1:8000")
 
-
-def send_reset_email(to_email, reset_token, base_url="http://127.0.0.1:8000"):
+def send_reset_email(to_email, reset_token, base_url=None):
+    base_url = base_url or BASE_URL
     reset_link = f"{base_url}/reset-password?token={reset_token}"
 
     body = f"""You requested a password reset for your Roota account.

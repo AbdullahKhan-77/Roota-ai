@@ -32,5 +32,5 @@ if __name__ == '__main__':
         report_path,
         api_key=config["api_key"],
         repo=config.get("repo"),
-        server=config.get("server", "http://127.0.0.1:8000")
+        server=config.get("server", "https://tryroota.dev")
     )

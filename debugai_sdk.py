@@ -4,7 +4,7 @@ import httpx
 from datetime import datetime
 
 
-DEBUGAI_SERVER = "http://127.0.0.1:8000"
+DEBUGAI_SERVER = "https://tryroota.dev"
 _config = {
     "repo": None,
     "server": DEBUGAI_SERVER,

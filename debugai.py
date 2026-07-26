@@ -17,6 +17,14 @@ def _load_api_key_from_config():
             return config.get('api_key')
     return None
 
+
+def _load_server_from_config():
+    if os.path.exists('.roota.json'):
+        with open('.roota.json', 'r') as f:
+            config = json.load(f)
+            return config.get('server', 'https://tryroota.dev')
+    return 'https://tryroota.dev'
+
 @click.command(help="debugai — AI-powered production log analyzer.\n\nAnalyzes log files, fetches relevant source code from GitHub, and produces AI-powered diagnoses with exact root causes and fixes.")
 @click.version_option(version="0.1.0", prog_name="debugai")
 @click.option('--log', required=True, help='Path to the log file to analyze (supports plain text, JSON logs, structured formats)')
@@ -86,8 +94,9 @@ def main(log, repo, crash_report,sync, api_key):
 
             console.print("\n[dim]Syncing to Roota dashboard...[/dim]")
             try:
+                server = _load_server_from_config()
                 response = httpx.post(
-                    "http://127.0.0.1:8000/ingest",
+                    f"{server}/ingest",
                     json={
                         "log_text": log_text,
                         "repo": repo,
