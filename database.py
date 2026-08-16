@@ -1,35 +1,39 @@
-import sqlite3
+import psycopg2
+import psycopg2.errors
+from psycopg2.extras import RealDictCursor
 import json
-from datetime import datetime
-from pathlib import Path
+import os
+from datetime import datetime, timedelta
 import secrets
 import bcrypt
-from datetime import datetime, timedelta
 
-DB_PATH = Path(__file__).parent / "debugai.db"
+DATABASE_URL = os.getenv("DATABASE_URL")
+
 
 def get_connection():
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
+    conn = psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
     return conn
+
 
 def init_db():
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id SERIAL PRIMARY KEY,
             name TEXT NOT NULL,
             username TEXT UNIQUE NOT NULL,
             email TEXT UNIQUE NOT NULL,
             api_key TEXT UNIQUE NOT NULL,
             password_hash TEXT NOT NULL,
-            created_at TEXT NOT NULL
+            created_at TEXT NOT NULL,
+            reset_token TEXT,
+            reset_token_expiry TEXT
         )
     ''')
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS incidents (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id SERIAL PRIMARY KEY,
             timestamp TEXT NOT NULL,
             log_text TEXT NOT NULL,
             repo TEXT,
@@ -43,19 +47,29 @@ def init_db():
             user_id INTEGER
         )
     ''')
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS waitlist (
+            id SERIAL PRIMARY KEY,
+            email TEXT UNIQUE NOT NULL,
+            created_at TEXT NOT NULL
+        )
+    ''')
 
     conn.commit()
+    cursor.close()
     conn.close()
     print("Database initialized.")
 
-def save_incident(log_text, repo, errors, warnings, diagnosis, total_lines,user_id=None):
+
+def save_incident(log_text, repo, errors, warnings, diagnosis, total_lines, user_id=None):
     conn = get_connection()
     cursor = conn.cursor()
 
     cursor.execute('''
-        INSERT INTO incidents 
-        (timestamp, log_text, repo, errors, warnings, diagnosis, total_lines, error_count, warning_count,user_id)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?,?)
+        INSERT INTO incidents
+        (timestamp, log_text, repo, errors, warnings, diagnosis, total_lines, error_count, warning_count, user_id)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        RETURNING id
     ''', (
         datetime.now().isoformat(),
         log_text,
@@ -69,61 +83,81 @@ def save_incident(log_text, repo, errors, warnings, diagnosis, total_lines,user_
         user_id
     ))
 
-    incident_id = cursor.lastrowid
+    incident_id = cursor.fetchone()['id']
     conn.commit()
+    cursor.close()
     conn.close()
     return incident_id
+
 
 def get_all_incidents():
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute('SELECT * FROM incidents ORDER BY timestamp DESC')
     rows = cursor.fetchall()
+    cursor.close()
     conn.close()
     return [dict(row) for row in rows]
+
 
 def get_incident(incident_id):
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute('SELECT * FROM incidents WHERE id = ?', (incident_id,))
+    cursor.execute('SELECT * FROM incidents WHERE id = %s', (incident_id,))
     row = cursor.fetchone()
+    cursor.close()
     conn.close()
     return dict(row) if row else None
+
 
 def save_feedback(incident_id, rating):
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute(
-        'UPDATE incidents SET feedback = ? WHERE id = ?',
+        'UPDATE incidents SET feedback = %s WHERE id = %s',
         (rating, incident_id)
     )
     conn.commit()
+    cursor.close()
     conn.close()
+
+
 def create_user(name, username, email, password):
+    if len(password) < 8:
+        return {"error": "Password must be at least 8 characters"}
+    if not email or "@" not in email or "." not in email.split("@")[-1] or len(email) > 254:
+        return {"error": "Enter a valid email address"}
+
     conn = get_connection()
     cursor = conn.cursor()
     password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
     api_key = secrets.token_urlsafe(32)
     try:
         cursor.execute(
-            'INSERT INTO users (name, username, email, api_key, password_hash, created_at) VALUES (?, ?, ?, ?, ?, ?)',
+            '''INSERT INTO users (name, username, email, api_key, password_hash, created_at)
+               VALUES (%s, %s, %s, %s, %s, %s) RETURNING id''',
             (name, username, email, api_key, password_hash, datetime.now().isoformat())
         )
+        user_id = cursor.fetchone()['id']
         conn.commit()
-        user_id = cursor.lastrowid
+        cursor.close()
         conn.close()
         return {"id": user_id, "name": name, "username": username, "email": email, "api_key": api_key}
-    except sqlite3.IntegrityError as e:
+    except psycopg2.errors.UniqueViolation as e:
+        conn.rollback()
+        cursor.close()
         conn.close()
         if 'username' in str(e):
             return {"error": "Username already taken"}
         return {"error": "Email already registered"}
-    
+
+
 def verify_user(login, password):
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute('SELECT * FROM users WHERE username = ? OR email = ?', (login, login))
+    cursor.execute('SELECT * FROM users WHERE username = %s OR email = %s', (login, login))
     row = cursor.fetchone()
+    cursor.close()
     conn.close()
     if not row:
         return None
@@ -132,46 +166,65 @@ def verify_user(login, password):
         return user
     return None
 
+
 def get_user_by_api_key(api_key):
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute('SELECT * FROM users WHERE api_key = ?', (api_key,))
+    cursor.execute('SELECT * FROM users WHERE api_key = %s', (api_key,))
     row = cursor.fetchone()
+    cursor.close()
     conn.close()
     return dict(row) if row else None
+
 
 def get_user_incidents(user_id):
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute(
-        'SELECT * FROM incidents WHERE user_id = ? ORDER BY timestamp DESC',
+        'SELECT * FROM incidents WHERE user_id = %s ORDER BY timestamp DESC',
         (user_id,)
     )
     rows = cursor.fetchall()
+    cursor.close()
     conn.close()
     return [dict(row) for row in rows]
 
-def migrate_add_reset_token_columns():
+
+def update_user_password(user_id, new_password_hash):
+    """Used by /change-password and /reset-password in api.py (previously raw sqlite3 in api.py)."""
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("PRAGMA table_info(users)")
-    columns = [row[1] for row in cursor.fetchall()]
-
-    if 'reset_token' not in columns:
-        cursor.execute('ALTER TABLE users ADD COLUMN reset_token TEXT')
-    if 'reset_token_expiry' not in columns:
-        cursor.execute('ALTER TABLE users ADD COLUMN reset_token_expiry TEXT')
-
+    cursor.execute(
+        'UPDATE users SET password_hash = %s WHERE id = %s',
+        (new_password_hash, user_id)
+    )
     conn.commit()
+    cursor.close()
     conn.close()
-    
-    
+
+
+def add_to_waitlist(email):
+    """Used by /waitlist in api.py (previously raw sqlite3 in api.py, table created on every request)."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            'INSERT INTO waitlist (email, created_at) VALUES (%s, %s) ON CONFLICT (email) DO NOTHING',
+            (email, datetime.now().isoformat())
+        )
+        conn.commit()
+    finally:
+        cursor.close()
+        conn.close()
+
+
 def set_reset_token(email):
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute('SELECT id FROM users WHERE email = ?', (email,))
+    cursor.execute('SELECT id FROM users WHERE email = %s', (email,))
     row = cursor.fetchone()
     if not row:
+        cursor.close()
         conn.close()
         return None
 
@@ -179,10 +232,11 @@ def set_reset_token(email):
     expiry = (datetime.now() + timedelta(hours=1)).isoformat()
 
     cursor.execute(
-        'UPDATE users SET reset_token = ?, reset_token_expiry = ? WHERE email = ?',
+        'UPDATE users SET reset_token = %s, reset_token_expiry = %s WHERE email = %s',
         (token, expiry, email)
     )
     conn.commit()
+    cursor.close()
     conn.close()
     return token
 
@@ -190,8 +244,9 @@ def set_reset_token(email):
 def get_user_by_reset_token(token):
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute('SELECT * FROM users WHERE reset_token = ?', (token,))
+    cursor.execute('SELECT * FROM users WHERE reset_token = %s', (token,))
     row = cursor.fetchone()
+    cursor.close()
     conn.close()
     if not row:
         return None
@@ -207,11 +262,13 @@ def clear_reset_token(user_id):
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute(
-        'UPDATE users SET reset_token = NULL, reset_token_expiry = NULL WHERE id = ?',
+        'UPDATE users SET reset_token = NULL, reset_token_expiry = NULL WHERE id = %s',
         (user_id,)
     )
     conn.commit()
+    cursor.close()
     conn.close()
-    
+
+
 if __name__ == '__main__':
     init_db()

@@ -314,6 +314,9 @@ def change_password(
     if not bcrypt.checkpw(current_password.encode('utf-8'), user['password_hash'].encode('utf-8')):
         raise HTTPException(status_code=400, detail="Current password is incorrect")
 
+    if len(new_password) < 8:
+        raise HTTPException(status_code=400, detail="Password must be at least 8 characters")
+
     new_hash = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
     update_user_password(user['id'], new_hash)
     return {"status": "success"}
@@ -343,6 +346,9 @@ def reset_password(token: str = Form(...), new_password: str = Form(...)):
     user = get_user_by_reset_token(token)
     if not user:
         raise HTTPException(status_code=400, detail="Invalid or expired reset link. Please request a new one.")
+
+    if len(new_password) < 8:
+        raise HTTPException(status_code=400, detail="Password must be at least 8 characters")
 
     new_hash = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
     update_user_password(user['id'], new_hash)
