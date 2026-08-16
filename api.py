@@ -191,13 +191,15 @@ async def ingest(data: dict, x_api_key: str = Header(None)):
 
         entries, errors, warnings = parse_log_file(tmp_path)
 
+        if repo:
+            repo = repo.strip().strip('/')
+            if not REPO_PATTERN.match(repo):
+                raise HTTPException(status_code=400, detail="repo must be in 'owner/repo_name' format")
+
         code_context = None
         if repo and errors:
             filenames = extract_filenames(errors)
-            repo = repo.strip().strip('/')
             parts = repo.split('/')
-            if len(parts) != 2:
-                raise HTTPException(status_code=400, detail="repo must be in 'owner/repo_name' format")
             owner, repo_name = parts[0], parts[1]
             branch = get_default_branch(owner, repo_name)
             code_context = {}
