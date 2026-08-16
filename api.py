@@ -73,11 +73,11 @@ async def analyze(
         code_context = None
 
         if repo:
-            filenames = extract_filenames(errors)
             repo = repo.strip().strip('/')
+            if not REPO_PATTERN.match(repo):
+                raise HTTPException(status_code=400, detail="repo must be in 'owner/repo_name' format")
+            filenames = extract_filenames(errors)
             parts = repo.split('/')
-            if len(parts) != 2:
-                raise HTTPException(status_code=400, detail="repo must be in 'owner/repo_name' format ")
             owner, repo_name = parts[0], parts[1]
             branch = get_default_branch(owner, repo_name)
             code_context = {}
