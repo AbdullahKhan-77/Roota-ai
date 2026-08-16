@@ -723,6 +723,17 @@ debugai_sdk.install(
 </main>
 
 <script>
+// ── ESCAPE HELPER ──
+// Any value that ultimately came from user input (repo names, feedback ratings, log-derived
+// diagnosis text) must go through this before being interpolated into an innerHTML template
+// literal. Sets textContent (never parsed as HTML) then reads innerHTML back, which the
+// browser has already escaped for us.
+function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str == null ? '' : String(str);
+    return div.innerHTML;
+}
+
 // ── AUTH CHECK ──
 const currentApiKey = localStorage.getItem('roota_api_key');
 const currentEmail = localStorage.getItem('roota_email');
@@ -915,7 +926,7 @@ async function loadIncidents() {
                         <span class="severity-badge ${sevClass}">${severity}</span>
                         <span class="incident-time">${timeAgo}</span>
                     </div>
-                    <div class="incident-msg">${preview.substring(0, 60)}${preview.length > 60 ? '...' : ''}</div>
+                    <div class="incident-msg">${escapeHtml(preview.substring(0, 60))}${preview.length > 60 ? '...' : ''}</div>
                     <div class="incident-actions">
                         <span class="feedback-label">Diagnosis?</span>
                         <button class="inc-btn correct" onclick="submitFeedback(${inc.id}, 'correct', this)">Correct</button>
@@ -965,12 +976,12 @@ function renderIncidentsTable(incidents) {
         const sevClass = severity === 'CRITICAL' ? 'sev-critical' : severity === 'WARNING' ? 'sev-warning' : 'sev-info';
         const preview = inc.diagnosis ? inc.diagnosis.split('\n').filter(l => l.trim() && !l.includes('INCIDENT SUMMARY:') && !l.startsWith('━'))[0] || '—' : '—';
         const timeAgo = getTimeAgo(inc.timestamp);
-        const feedback = inc.feedback ? `<span style="font-size:0.7rem; color:${inc.feedback === 'correct' ? '#7defb6' : '#fca5a5'}">✓ ${inc.feedback}</span>` : '—';
+        const feedback = inc.feedback ? `<span style="font-size:0.7rem; color:${inc.feedback === 'correct' ? '#7defb6' : '#fca5a5'}">✓ ${escapeHtml(inc.feedback)}</span>` : '—';
 
         return `<div class="table-row">
             <div class="cell"><span class="severity-badge ${sevClass}">${severity}</span></div>
-            <div class="cell primary">${preview.substring(0, 60)}${preview.length > 60 ? '...' : ''}</div>
-            <div class="cell">${inc.repo || '—'}</div>
+            <div class="cell primary">${escapeHtml(preview.substring(0, 60))}${preview.length > 60 ? '...' : ''}</div>
+            <div class="cell">${escapeHtml(inc.repo) || '—'}</div>
             <div class="cell">${timeAgo}</div>
             <div class="cell">${feedback}</div>
         </div>`;
