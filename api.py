@@ -14,6 +14,10 @@ from fastapi.responses import FileResponse, RedirectResponse
 import bcrypt
 from database import set_reset_token, get_user_by_reset_token, clear_reset_token, update_user_password, add_to_waitlist
 from email_utils import send_reset_email
+import re
+# owner/repo format only: letters, digits, dots, hyphens, underscores on each side of exactly one slash.
+# Runs unconditionally on any user-supplied repo string, regardless of downstream branches (see /analyze, /ingest).
+REPO_PATTERN = re.compile(r'^[A-Za-z0-9][A-Za-z0-9_.-]{0,99}/[A-Za-z0-9_.-]{1,100}$')
 
 app = FastAPI(title="Roota API", version="0.1.0")
 
