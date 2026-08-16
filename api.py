@@ -11,10 +11,8 @@ from ai import analyze_logs
 from github import fetch_file_from_github, get_repo_file_tree, find_full_path, find_file_by_function, get_default_branch
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, RedirectResponse
-import sqlite3
 import bcrypt
-from database import DB_PATH
-from database import set_reset_token, get_user_by_reset_token, clear_reset_token
+from database import set_reset_token, get_user_by_reset_token, clear_reset_token, update_user_password, add_to_waitlist
 from email_utils import send_reset_email
 
 app = FastAPI(title="Roota API", version="0.1.0")
@@ -309,11 +307,7 @@ def change_password(
         raise HTTPException(status_code=400, detail="Current password is incorrect")
 
     new_hash = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    cursor.execute('UPDATE users SET password_hash = ? WHERE id = ?', (new_hash, user['id']))
-    conn.commit()
-    conn.close()
+    update_user_password(user['id'], new_hash)
     return {"status": "success"}
 
 @app.post("/waitlist")
@@ -321,18 +315,7 @@ def join_waitlist(email: str = Form(...)):
     email = email.strip().lower()
     if not email or "@" not in email or "." not in email.split("@")[-1] or len(email) > 254:
         raise HTTPException(status_code=400, detail="Enter a valid email address")
-    conn = sqlite3.connect(DB_PATH)
-    try:
-        cursor = conn.cursor()
-        cursor.execute('''CREATE TABLE IF NOT EXISTS waitlist (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            email TEXT UNIQUE NOT NULL,
-            created_at TEXT DEFAULT CURRENT_TIMESTAMP
-        )''')
-        cursor.execute('INSERT OR IGNORE INTO waitlist (email) VALUES (?)', (email,))
-        conn.commit()
-    finally:
-        conn.close()
+    add_to_waitlist(email)
     return {"status": "success"}
 
 
@@ -354,11 +337,7 @@ def reset_password(token: str = Form(...), new_password: str = Form(...)):
         raise HTTPException(status_code=400, detail="Invalid or expired reset link. Please request a new one.")
 
     new_hash = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    cursor.execute('UPDATE users SET password_hash = ? WHERE id = ?', (new_hash, user['id']))
-    conn.commit()
-    conn.close()
+    update_user_password(user['id'], new_hash)
 
     clear_reset_token(user['id'])
     return {"status": "success"}
