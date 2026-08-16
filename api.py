@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File, Form, Query,Header, HTTPException
+from fastapi import FastAPI, UploadFile, File, Form, Query,Header, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
 import tempfile
@@ -18,6 +18,16 @@ import re
 # owner/repo format only: letters, digits, dots, hyphens, underscores on each side of exactly one slash.
 # Runs unconditionally on any user-supplied repo string, regardless of downstream branches (see /analyze, /ingest).
 REPO_PATTERN = re.compile(r'^[A-Za-z0-9][A-Za-z0-9_.-]{0,99}/[A-Za-z0-9_.-]{1,100}$')
+from database import check_rate_limit
+
+def get_client_ip(request: Request):
+    # Heroku's router sits in front of the dyno, so the real client IP is the
+    # first entry in X-Forwarded-For, not request.client.host (that's Heroku's
+    # internal router). Falls back to request.client.host for local dev.
+    forwarded = request.headers.get("x-forwarded-for")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    return request.client.host if request.client else "unknown"
 
 app = FastAPI(title="Roota API", version="0.1.0")
 
@@ -180,6 +190,8 @@ async def ingest(data: dict, x_api_key: str = Header(None)):
     user = get_user_by_api_key(x_api_key)
     if not user:
         raise HTTPException(status_code=401, detail="Invalid API key")
+    if not check_rate_limit(x_api_key, "ingest", limit=30, window_seconds=60):
+        raise HTTPException(status_code=429, detail="Rate limit exceeded. Please slow down.")
 
     try:
         log_text = data.get('log_text', '')
@@ -248,11 +260,14 @@ async def ingest(data: dict, x_api_key: str = Header(None)):
     
 @app.post("/register")
 def register(
+    request: Request,
     name: str = Form(...),
     username: str = Form(...),
     email: str = Form(...),
     password: str = Form(...)
 ):
+    if not check_rate_limit(get_client_ip(request), "register", limit=5, window_seconds=3600):
+        raise HTTPException(status_code=429, detail="Too many registration attempts. Please try again later.")
     result = create_user(name, username, email, password)
     if result.get("error"):
         raise HTTPException(status_code=400, detail=result["error"])
@@ -262,9 +277,10 @@ def register(
         "username": result["username"],
         "api_key": result["api_key"]
     }
-
 @app.post("/login")
-def login(login: str = Form(...), password: str = Form(...)):
+def login(request: Request, login: str = Form(...), password: str = Form(...)):
+    if not check_rate_limit(get_client_ip(request), "login", limit=10, window_seconds=60):
+        raise HTTPException(status_code=429, detail="Too many login attempts. Please try again in a minute.")
     user = verify_user(login, password)
     if not user:
         raise HTTPException(status_code=401, detail="Invalid username/email or password")

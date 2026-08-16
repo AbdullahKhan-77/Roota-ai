@@ -3,7 +3,7 @@ import psycopg2.errors
 from psycopg2.extras import RealDictCursor
 import json
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import secrets
 import bcrypt
 
@@ -52,6 +52,15 @@ def init_db():
             id SERIAL PRIMARY KEY,
             email TEXT UNIQUE NOT NULL,
             created_at TEXT NOT NULL
+        )
+    ''')
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS rate_limits (
+            identifier TEXT NOT NULL,
+            bucket TEXT NOT NULL,
+            window_start BIGINT NOT NULL,
+            count INTEGER NOT NULL DEFAULT 1,
+            PRIMARY KEY (identifier, bucket, window_start)
         )
     ''')
 
@@ -240,6 +249,31 @@ def set_reset_token(email):
     conn.close()
     return token
 
+def check_rate_limit(identifier, bucket, limit, window_seconds):
+    """
+    Fixed-window rate limiter backed by Postgres. Safe across multiple gunicorn
+    workers because the increment is a single atomic upsert - Postgres
+    serializes concurrent writers on the same row, so two workers can't both
+    read count=N and both write back N+1.
+    """
+    now_epoch = int(datetime.now(timezone.utc).timestamp())
+    window_start = now_epoch - (now_epoch % window_seconds)
+
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        '''INSERT INTO rate_limits (identifier, bucket, window_start, count)
+           VALUES (%s, %s, %s, 1)
+           ON CONFLICT (identifier, bucket, window_start)
+           DO UPDATE SET count = rate_limits.count + 1
+           RETURNING count''',
+        (identifier, bucket, window_start)
+    )
+    count = cursor.fetchone()['count']
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return count <= limit
 
 def get_user_by_reset_token(token):
     conn = get_connection()
