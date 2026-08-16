@@ -164,6 +164,8 @@ def submit_feedback(incident_id: int, rating: str = Query(...), x_api_key: str =
         raise HTTPException(status_code=404, detail="Incident not found")
     if incident['user_id'] != user['id']:
         raise HTTPException(status_code=404, detail="Not found")
+    if rating not in ("correct", "incorrect"):
+        raise HTTPException(status_code=400, detail="rating must be 'correct' or 'incorrect'")
     save_feedback(incident_id, rating)
     return {"status": "feedback saved", "incident_id": incident_id, "rating": rating}
 
